@@ -328,7 +328,7 @@ else:
 </div>
 </div>""", unsafe_allow_html=True)
         
-        # Lustiges 26er Ranking ("Die Frühstücks-Könige" / "The Breakfast Club") - 3 Spieler
+        # Lustiges 26er Ranking ("26er Könige - Ist zwar keine 180, aber trotzdem ein echter Klassiker") - 3 Spieler
         try:
             df_26 = get_top_26er_players(season="2026/2027", limit=3)
         except Exception:
@@ -336,9 +336,9 @@ else:
             
         rows_list = []
         rank_styles = [
-            {"num_color": "#EF4444", "bg": "linear-gradient(90deg, rgba(239, 68, 68, 0.12), rgba(255,255,255,0.02))", "border": "rgba(239, 68, 68, 0.35)", "cnt_color": "#EF4444"},
-            {"num_color": "#F59E0B", "bg": "rgba(245, 158, 11, 0.05)", "border": "rgba(245, 158, 11, 0.25)", "cnt_color": "#F59E0B"},
-            {"num_color": "#94A3B8", "bg": "rgba(255, 255, 255, 0.02)", "border": "rgba(148, 163, 184, 0.2)", "cnt_color": "#CBD5E1"}
+            {"num_color": "#F59E0B", "bg": "linear-gradient(90deg, rgba(245, 158, 11, 0.12), rgba(255,255,255,0.02))", "border": "rgba(245, 158, 11, 0.35)", "cnt_color": "#F59E0B"},
+            {"num_color": "#CBD5E1", "bg": "rgba(255, 255, 255, 0.02)", "border": "rgba(203, 213, 225, 0.25)", "cnt_color": "#CBD5E1"},
+            {"num_color": "#D97706", "bg": "rgba(217, 119, 6, 0.05)", "border": "rgba(217, 119, 6, 0.25)", "cnt_color": "#F59E0B"}
         ]
         
         for idx, row in df_26.iterrows():
@@ -367,10 +367,11 @@ else:
         if rows_list:
             p26_rows_html = "\n".join(rows_list)
         else:
-            p26_rows_html = '<div style="color:#94A3B8;text-align:center;padding:10px;font-size:12px;">Noch kein Frühstück serviert ☕</div>'
+            p26_rows_html = '<div style="color:#94A3B8;text-align:center;padding:10px;font-size:12px;">Noch kein 26er Klassiker geworfen 🎯</div>'
 
         st.markdown(f"""<div class="mockup-card" style="margin-bottom: 12px; padding: 12px 18px;">
-<div class="card-title" style="font-size: 14px !important; margin-bottom: 8px; padding-bottom: 4px;"><span>🥐 DIE FRÜHSTÜCKS-KÖNIGE (26er)</span><span style="font-size: 11px; color: #EF4444; font-weight: 700; background: rgba(239, 68, 68, 0.12); padding: 2px 8px; border-radius: 6px; border: 1px solid rgba(239, 68, 68, 0.3);">FLOP 3 🎯</span></div>
+<div class="card-title" style="font-size: 14px !important; margin-bottom: 2px; padding-bottom: 2px;"><span>👑 26er KÖNIGE</span><span style="font-size: 10.5px; color: #F59E0B; font-weight: 700; background: rgba(245, 158, 11, 0.12); padding: 2px 8px; border-radius: 6px; border: 1px solid rgba(245, 158, 11, 0.3);">KLASSIKER 🎯</span></div>
+<div style="font-size: 11px; color: #94A3B8; font-style: italic; margin-bottom: 8px;">Ist zwar keine 180, aber trotzdem ein echter Klassiker.</div>
 <div style="display: flex; flex-direction: column; gap: 6px;">
 {p26_rows_html}
 </div>
