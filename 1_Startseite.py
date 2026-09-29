@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import datetime
-from database import init_db, get_matches, get_settings, get_players, update_player_password, get_doubles_specials
+from database import init_db, get_matches, get_settings, get_players, update_player_password, get_doubles_specials, get_top_26er_players
 from utils import (
     calculate_match_performance, 
     apply_custom_theme, 
@@ -122,7 +122,11 @@ st.markdown(f"""<div style="background: rgba(8, 20, 48, 0.85); border: 1px solid
 <img src="data:image/png;base64,{logo_b64}" width="48" height="48" style="border-radius: 50%; box-shadow: 0 0 12px #00D4FF;" />
 <span style="font-weight: 900; font-size: 24px; color: #FFFFFF; letter-spacing: 1px; text-shadow: 0 0 12px rgba(0,212,255,0.5);">LIONS LEAGUE - SC WEYHAUSEN</span>
 </div>
-<div></div>
+<div style="display: flex; align-items: center; gap: 10px;">
+<span style="background: rgba(0, 212, 255, 0.15); border: 1px solid #00D4FF; color: #00D4FF; font-weight: 800; font-size: 14px; padding: 6px 14px; border-radius: 8px; letter-spacing: 0.5px;">
+🟢 Version V1.10
+</span>
+</div>
 </div>""", unsafe_allow_html=True)
 
 matches_df = get_matches()
@@ -146,6 +150,7 @@ else:
                 'Spieler': row['player_name'],
                 'Team': row['team'],
                 'Gegner': row['opponent'],
+                'Base_Rating': perf.get('base_rating', perf['total_rating'] - perf['specials_bonus']),
                 'Rating': perf['total_rating'],
                 'Sieg': '✅' if perf['win_ratio'] == 100 else '❌',
                 'Is_Win': 1 if perf['win_ratio'] == 100 else 0,
@@ -276,8 +281,11 @@ else:
 
     with col2:
         if not res_df.empty:
-            top_month = res_df.groupby(['Spieler', 'Team'])['Rating'].mean().reset_index()
-            top_month['Rating'] = top_month.apply(lambda r: r['Rating'] + doubles_bonus_map.get(r['Spieler'], 0.0), axis=1)
+            top_month = res_df.groupby(['Spieler', 'Team']).agg({
+                'Base_Rating': 'mean',
+                'Specials': 'sum'
+            }).reset_index()
+            top_month['Rating'] = top_month['Base_Rating'] + (top_month['Specials'] * 0.5) + top_month['Spieler'].map(lambda p: doubles_bonus_map.get(p, 0.0))
             top_month = top_month.sort_values(by='Rating', ascending=False).head(3).reset_index(drop=True)
         else:
             top_month = pd.DataFrame()
@@ -320,6 +328,84 @@ else:
 </div>
 </div>""", unsafe_allow_html=True)
         
+        # Meiste 26er Scores ("Breakfast") - Top 2 Spieler
+        try:
+            df_26 = get_top_26er_players(season="2026/2027", limit=2)
+        except Exception:
+            df_26 = pd.DataFrame()
+            
+        p26_1 = df_26.iloc[0] if len(df_26) > 0 else None
+        p26_2 = df_26.iloc[1] if len(df_26) > 1 else None
+        
+        if p26_1 is not None and p26_2 is not None:
+            av_26_1 = get_avatar_svg(p26_1['player_name'], "#F59E0B", 36)
+            av_26_2 = get_avatar_svg(p26_2['player_name'], "#94A3B8", 34)
+            name_26_1 = get_short_name(p26_1['player_name'])
+            name_26_2 = get_short_name(p26_2['player_name'])
+            team_26_1 = p26_1['team']
+            team_26_2 = p26_2['team']
+            cnt_26_1 = int(p26_1['count_26'])
+            cnt_26_2 = int(p26_2['count_26'])
+            
+            p26_rows_html = f"""
+<div style="display: flex; align-items: center; justify-content: space-between; background: linear-gradient(90deg, rgba(245, 158, 11, 0.12), rgba(255,255,255,0.02)); padding: 6px 12px; border-radius: 9px; border: 1px solid rgba(245, 158, 11, 0.35);">
+    <div style="display: flex; align-items: center; gap: 8px;">
+        <div style="font-size: 14px; font-weight: 900; color: #F59E0B; width: 16px;">1.</div>
+        {av_26_1}
+        <div>
+            <div style="font-size: 13.5px; font-weight: 700; color: #FFFFFF; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{name_26_1}</div>
+            <div style="font-size: 10.5px; color: #94A3B8; font-weight: 600;">{team_26_1}</div>
+        </div>
+    </div>
+    <div style="text-align: right;">
+        <div style="font-size: 16px; font-weight: 900; color: #F59E0B;">{cnt_26_1}×</div>
+        <div style="font-size: 9.5px; color: #64748B; font-weight: 600; text-transform: uppercase;">26er Scores</div>
+    </div>
+</div>
+<div style="display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.02); padding: 6px 12px; border-radius: 9px; border: 1px solid rgba(148, 163, 184, 0.2);">
+    <div style="display: flex; align-items: center; gap: 8px;">
+        <div style="font-size: 13.5px; font-weight: 800; color: #94A3B8; width: 16px;">2.</div>
+        {av_26_2}
+        <div>
+            <div style="font-size: 13px; font-weight: 700; color: #FFFFFF; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{name_26_2}</div>
+            <div style="font-size: 10.5px; color: #94A3B8; font-weight: 600;">{team_26_2}</div>
+        </div>
+    </div>
+    <div style="text-align: right;">
+        <div style="font-size: 15px; font-weight: 800; color: #CBD5E1;">{cnt_26_2}×</div>
+        <div style="font-size: 9.5px; color: #64748B; font-weight: 600; text-transform: uppercase;">26er Scores</div>
+    </div>
+</div>"""
+        elif p26_1 is not None:
+            av_26_1 = get_avatar_svg(p26_1['player_name'], "#F59E0B", 36)
+            name_26_1 = get_short_name(p26_1['player_name'])
+            team_26_1 = p26_1['team']
+            cnt_26_1 = int(p26_1['count_26'])
+            p26_rows_html = f"""
+<div style="display: flex; align-items: center; justify-content: space-between; background: linear-gradient(90deg, rgba(245, 158, 11, 0.12), rgba(255,255,255,0.02)); padding: 6px 12px; border-radius: 9px; border: 1px solid rgba(245, 158, 11, 0.35);">
+    <div style="display: flex; align-items: center; gap: 8px;">
+        <div style="font-size: 14px; font-weight: 900; color: #F59E0B; width: 16px;">1.</div>
+        {av_26_1}
+        <div>
+            <div style="font-size: 13.5px; font-weight: 700; color: #FFFFFF;">{name_26_1}</div>
+            <div style="font-size: 10.5px; color: #94A3B8; font-weight: 600;">{team_26_1}</div>
+        </div>
+    </div>
+    <div style="text-align: right;">
+        <div style="font-size: 16px; font-weight: 900; color: #F59E0B;">{cnt_26_1}×</div>
+        <div style="font-size: 9.5px; color: #64748B; font-weight: 600; text-transform: uppercase;">26er Scores</div>
+    </div>
+</div>"""
+        else:
+            p26_rows_html = '<div style="color:#94A3B8;text-align:center;padding:10px;font-size:12px;">Noch keine 26er Scores erfasst</div>'
+
+        st.markdown(f"""<div class="mockup-card" style="margin-bottom: 12px; padding: 12px 18px;">
+<div class="card-title" style="font-size: 14px !important; margin-bottom: 8px; padding-bottom: 4px;"><span>🎯 MEISTE 26er SCORES</span><span style="font-size: 11px; color: #F59E0B; font-weight: 700; background: rgba(245, 158, 11, 0.12); padding: 2px 8px; border-radius: 6px; border: 1px solid rgba(245, 158, 11, 0.3);">TOP 2</span></div>
+<div style="display: flex; flex-direction: column; gap: 6px;">
+{p26_rows_html}
+</div>
+</div>""", unsafe_allow_html=True)
+        
         tot_specials = (res_df['Specials'].sum() if not res_df.empty else 0) + len(doubles_df)
         
         st.markdown(f"""<div class="mockup-card" style="margin-bottom: 0px;">
@@ -345,11 +431,12 @@ else:
     with col3:
         if not res_df.empty:
             leaderboard = res_df.groupby(['Spieler', 'Team']).agg({
-                'Rating': 'mean',
+                'Base_Rating': 'mean',
                 'Gesamt Avg': 'mean',
-                'Match_ID': 'count'
+                'Match_ID': 'count',
+                'Specials': 'sum'
             }).reset_index()
-            leaderboard['Rating'] = leaderboard.apply(lambda r: r['Rating'] + doubles_bonus_map.get(r['Spieler'], 0.0), axis=1)
+            leaderboard['Rating'] = leaderboard['Base_Rating'] + (leaderboard['Specials'] * 0.5) + leaderboard['Spieler'].map(lambda p: doubles_bonus_map.get(p, 0.0))
             leaderboard = leaderboard.sort_values(by='Rating', ascending=False).reset_index(drop=True)
         else:
             leaderboard = pd.DataFrame()

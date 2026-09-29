@@ -180,6 +180,104 @@ def migrate(pg_url):
         pg_c.execute("SELECT setval(pg_get_serial_sequence('doubles_matches', 'id'), coalesce(max(id), 1)) FROM doubles_matches;")
         pg_conn.commit()
 
+    # 7. Analytics Matches übertragen
+    from psycopg2.extras import execute_values
+    sqlite_c.execute('''
+        SELECT id, player_a_id, player_b_id, player_a_name, player_b_name, match_date,
+               event_name, round_name, best_of_legs, location, winner_id, season,
+               league_match_id, created_at, duration_min, start_time, end_time,
+               board_nr, match_nr, round_nr
+        FROM analytics_matches
+    ''')
+    am_rows = sqlite_c.fetchall()
+    print(f"Übertrage {len(am_rows)} analytics_matches...")
+    if am_rows:
+        execute_values(pg_c, '''
+            INSERT INTO analytics_matches (
+                id, player_a_id, player_b_id, player_a_name, player_b_name, match_date,
+                event_name, round_name, best_of_legs, location, winner_id, season,
+                league_match_id, created_at, duration_min, start_time, end_time,
+                board_nr, match_nr, round_nr
+            ) VALUES %s
+            ON CONFLICT (id) DO UPDATE SET
+                player_a_id = EXCLUDED.player_a_id,
+                player_b_id = EXCLUDED.player_b_id,
+                player_a_name = EXCLUDED.player_a_name,
+                player_b_name = EXCLUDED.player_b_name,
+                match_date = EXCLUDED.match_date,
+                event_name = EXCLUDED.event_name,
+                round_name = EXCLUDED.round_name,
+                best_of_legs = EXCLUDED.best_of_legs,
+                location = EXCLUDED.location,
+                winner_id = EXCLUDED.winner_id,
+                season = EXCLUDED.season,
+                league_match_id = EXCLUDED.league_match_id,
+                duration_min = EXCLUDED.duration_min,
+                start_time = EXCLUDED.start_time,
+                end_time = EXCLUDED.end_time,
+                board_nr = EXCLUDED.board_nr,
+                match_nr = EXCLUDED.match_nr,
+                round_nr = EXCLUDED.round_nr
+        ''', am_rows, page_size=1000)
+        pg_c.execute("SELECT setval(pg_get_serial_sequence('analytics_matches', 'id'), coalesce(max(id), 1)) FROM analytics_matches;")
+        pg_conn.commit()
+
+    # 8. Analytics Legs übertragen
+    sqlite_c.execute('''
+        SELECT id, match_id, leg_num, starter_player_id, winner_player_id,
+               score_before_a, score_before_b, darts_thrown_a, darts_thrown_b,
+               checkout_a, checkout_b, is_break
+        FROM analytics_legs
+    ''')
+    al_rows = sqlite_c.fetchall()
+    al_rows = [(*r[:-1], bool(r[-1])) for r in al_rows]
+    print(f"Übertrage {len(al_rows)} analytics_legs...")
+    if al_rows:
+        execute_values(pg_c, '''
+            INSERT INTO analytics_legs (
+                id, match_id, leg_num, starter_player_id, winner_player_id,
+                score_before_a, score_before_b, darts_thrown_a, darts_thrown_b,
+                checkout_a, checkout_b, is_break
+            ) VALUES %s
+            ON CONFLICT (id) DO UPDATE SET
+                match_id = EXCLUDED.match_id,
+                leg_num = EXCLUDED.leg_num,
+                starter_player_id = EXCLUDED.starter_player_id,
+                winner_player_id = EXCLUDED.winner_player_id,
+                score_before_a = EXCLUDED.score_before_a,
+                score_before_b = EXCLUDED.score_before_b,
+                darts_thrown_a = EXCLUDED.darts_thrown_a,
+                darts_thrown_b = EXCLUDED.darts_thrown_b,
+                checkout_a = EXCLUDED.checkout_a,
+                checkout_b = EXCLUDED.checkout_b,
+                is_break = EXCLUDED.is_break
+        ''', al_rows, page_size=2000)
+        pg_c.execute("SELECT setval(pg_get_serial_sequence('analytics_legs', 'id'), coalesce(max(id), 1)) FROM analytics_legs;")
+        pg_conn.commit()
+
+    # 9. Analytics Visits übertragen
+    sqlite_c.execute('''
+        SELECT id, leg_id, player_id, visit_order, score, rest_score, opponent_rest_at_visit
+        FROM analytics_visits
+    ''')
+    av_rows = sqlite_c.fetchall()
+    print(f"Übertrage {len(av_rows)} analytics_visits...")
+    if av_rows:
+        execute_values(pg_c, '''
+            INSERT INTO analytics_visits (
+                id, leg_id, player_id, visit_order, score, rest_score, opponent_rest_at_visit
+            ) VALUES %s
+            ON CONFLICT (id) DO UPDATE SET
+                leg_id = EXCLUDED.leg_id,
+                player_id = EXCLUDED.player_id,
+                visit_order = EXCLUDED.visit_order,
+                score = EXCLUDED.score,
+                rest_score = EXCLUDED.rest_score,
+                opponent_rest_at_visit = EXCLUDED.opponent_rest_at_visit
+        ''', av_rows, page_size=5000)
+        pg_c.execute("SELECT setval(pg_get_serial_sequence('analytics_visits', 'id'), coalesce(max(id), 1)) FROM analytics_visits;")
+        pg_conn.commit()
+
     sqlite_conn.close()
     pg_conn.close()
     print("Erfolgreich: Alle Daten wurden vollständig nach Supabase migriert!")

@@ -42,8 +42,10 @@ st.markdown("""
                 Deterministische Steel-Dart Leistungsdiagnostik • Einzelanalyse & Head-to-Head Spieler-Vergleich
             </p>
         </div>
-        <div style="background: rgba(0,212,255,0.1); border: 1px solid #00D4FF; border-radius: 8px; padding: 6px 14px; color: #00D4FF; font-weight: 700; font-size: 13px;">
-            📊 PERFORMANCE ANALYTICS
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="background: rgba(0, 212, 255, 0.15); border: 1px solid #00D4FF; border-radius: 8px; padding: 6px 14px; color: #00D4FF; font-weight: 800; font-size: 13px;">
+                🟢 ENGINE V1.10
+            </span>
         </div>
     </div>
 </div>
@@ -156,45 +158,80 @@ with tab_single:
     legs_visits = get_player_leg_visits(selected_player_id, season=filter_season)
 
     if not legs_visits:
-        st.markdown("<br>", unsafe_allow_html=True)
-        st.info(f"🎯 Für **{selected_player_name}** ({selected_player_team}) liegen in der Saison **{season_choice}** noch keine detaillierten Visit-Aufnahmen vor.")
-        st.markdown("""
-        <div class="mockup-card" style="margin-top: 15px;">
-            <h3 style="color: #00D4FF; font-size: 18px; margin-top: 0;">💡 Wie werden Visit-Daten erfasst?</h3>
-            <p style="color: #CBD5E1; font-size: 15px;">
-                Detaillierte Spieldaten mit jeder einzelnen 3-Dart-Aufnahme können unter <b>„Eingabe“ ➔ Tab „🎯 Detailliertes Match“</b> erfasst werden.
-                Dabei berechnet das System automatisch alle Ligakennzahlen (Averages, 80+, 100+, 180er) für die reguläre Tabelle mit – <b>ohne doppelte Eingabe!</b>
-            </p>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        st.markdown("<br>", unsafe_allow_html=True)
-        if st.button("🚀 Beispiel-Spieldaten für diesen Spieler generieren (Demo-Test)", type="primary", key="btn_demo_single"):
-            from analytics.data_access import save_full_analytics_match
-            demo_legs = [
-                {
-                    'starter_player_id': selected_player_id,
-                    'winner_player_id': selected_player_id,
-                    'visits_a': [{'score': 140, 'rest_score': 361}, {'score': 100, 'rest_score': 261}, {'score': 85, 'rest_score': 176}, {'score': 100, 'rest_score': 76}, {'score': 76, 'rest_score': 0}],
-                    'visits_b': [{'score': 60, 'rest_score': 441}, {'score': 60, 'rest_score': 381}, {'score': 80, 'rest_score': 301}, {'score': 60, 'rest_score': 241}]
-                },
-                {
-                    'starter_player_id': 9999,
-                    'winner_player_id': selected_player_id,
-                    'visits_a': [{'score': 100, 'rest_score': 401}, {'score': 140, 'rest_score': 261}, {'score': 95, 'rest_score': 166}, {'score': 60, 'rest_score': 106}, {'score': 70, 'rest_score': 36}, {'score': 36, 'rest_score': 0}],
-                    'visits_b': [{'score': 100, 'rest_score': 401}, {'score': 60, 'rest_score': 341}, {'score': 60, 'rest_score': 281}, {'score': 81, 'rest_score': 200}, {'score': 60, 'rest_score': 140}]
-                }
-            ]
-            meta = {
-                'player_a_id': selected_player_id, 'player_b_id': 0,
-                'player_a_name': selected_player_name, 'player_b_name': 'Trainingspartner (Demo)',
-                'match_date': '2026-09-01', 'season': filter_season if filter_season else '2026/2027',
-                'winner_id': selected_player_id
-            }
-            save_full_analytics_match(meta, demo_legs, auto_sync_league=False)
-            st.success("✅ Beispiel-Aufnahmen erfolgreich gespeichert! Lade Daten neu...")
-            st.rerun()
-    else:
+        # Prüfen ob flüchtige Simulation im Session-State aktiv ist
+        sim_key = f"sim_data_{selected_player_id}_{season_choice}"
+        if st.session_state.get(sim_key):
+            legs_visits = st.session_state[sim_key]
+            st.markdown(f"""
+            <div style="background: rgba(245, 158, 11, 0.15); border: 1px solid #F59E0B; border-radius: 10px; padding: 10px 18px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;">
+                <span style="color: #FBBF24; font-weight: 700; font-size: 14px;">
+                    🎲 <b>SIMULATIONS-MODUS AKTIV:</b> Testdaten für {selected_player_name} (Schnitt 38–55 Avg). Reine Session-Anzeige – beim Neuladen der Seite verschwinden die Daten sofort wieder!
+                </span>
+            </div>
+            """, unsafe_allow_html=True)
+            if st.button("❌ Simulation beenden & Daten verwerfen", key="btn_clear_sim_single"):
+                del st.session_state[sim_key]
+                st.rerun()
+        else:
+            st.markdown("<br>", unsafe_allow_html=True)
+            st.info(f"🎯 Für **{selected_player_name}** ({selected_player_team}) liegen in der Saison **{season_choice}** noch keine detaillierten Visit-Aufnahmen vor.")
+            st.markdown("""
+            <div class="mockup-card" style="margin-top: 15px;">
+                <h3 style="color: #00D4FF; font-size: 18px; margin-top: 0;">💡 Wie werden Visit-Daten erfasst?</h3>
+                <p style="color: #CBD5E1; font-size: 15px;">
+                    Detaillierte Spieldaten mit jeder einzelnen 3-Dart-Aufnahme können unter <b>„Eingabe“ ➔ Tab „🎯 Detailliertes Match“</b> erfasst werden.
+                    Dabei berechnet das System automatisch alle Ligakennzahlen (Averages, 80+, 100+, 180er) für die reguläre Tabelle mit – <b>ohne doppelte Eingabe!</b>
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            st.markdown("<br>", unsafe_allow_html=True)
+            col_sim1, col_sim2 = st.columns([1.5, 2.5])
+            with col_sim1:
+                target_sim_avg = st.slider("🎯 Ziel-Average simulieren", min_value=38.0, max_value=55.0, value=46.0, step=0.5, key="slider_sim_avg_single")
+            with col_sim2:
+                st.markdown("<div style='margin-top: 28px;'></div>", unsafe_allow_html=True)
+                if st.button(f"🎲 Simulation starten (Ø {target_sim_avg:.1f} Avg)", type="primary", key="btn_run_sim_single"):
+                    import random
+                    # Generiere 8 realistische Legs mit gefordertem Average (flüchtig im RAM)
+                    sim_legs = []
+                    for l_idx in range(8):
+                        visits = []
+                        cur_rest = 501
+                        won = (l_idx % 2 == 0)
+                        num_visits = max(8, int(501 / target_sim_avg))
+                        
+                        scores = []
+                        for _ in range(num_visits - 1):
+                            sc = int(np.clip(np.random.normal(target_sim_avg, 18), 15, 140))
+                            if cur_rest - sc < 2:
+                                sc = max(0, cur_rest - 2)
+                            cur_rest -= sc
+                            scores.append(sc)
+                        
+                        if won:
+                            scores.append(cur_rest)
+                            cur_rest = 0
+                        else:
+                            last_sc = random.choice([26, 41, 45, 60])
+                            scores.append(last_sc)
+                            cur_rest = max(10, cur_rest - last_sc)
+                            
+                        calc_rest = 501
+                        for sc in scores:
+                            calc_rest -= sc
+                            visits.append({
+                                'score': sc,
+                                'rest_score': max(0, calc_rest),
+                                'darts_thrown': random.choice([1, 2, 3]) if calc_rest == 0 else 3,
+                                'winner_player_id': selected_player_id if calc_rest == 0 else 0
+                            })
+                        sim_legs.append(visits)
+                        
+                    st.session_state[sim_key] = sim_legs
+                    st.rerun()
+
+    if legs_visits:
         ana = compute_player_analytics(selected_player_id, selected_player_name, legs_visits)
         v_stats = ana['visit_stats']
         first_n = ana['first_n']
@@ -426,10 +463,10 @@ with tab_single:
                 </div>
             </div>
 
-            <!-- 3-Card Dashboard-Grid: Psychologische & Verhaltens-Diagnostik -->
+            <!-- 3-Card Dashboard-Grid: Leistung & Verhalten -->
             <div style="margin-top: 6px;">
                 <div style="color: #38BDF8; font-size: 11px; font-weight: 800; letter-spacing: 1px; margin-bottom: 10px;">
-                    🧠 PSYCHOLOGISCHE LEISTUNGSDIAGNOSTIK & VERHALTEN
+                    LEISTUNG & VERHALTEN
                 </div>
                 <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
                     <!-- Karte 1: Bounce-Back -->
@@ -640,11 +677,47 @@ with tab_compare:
     else:
         legs_a = get_player_leg_visits(cmp_a_id, season=cmp_filter_season)
         legs_b = get_player_leg_visits(cmp_b_id, season=cmp_filter_season)
-        
+
+        # Prüfen ob flüchtige Simulationsdaten im Session-State vorliegen
+        sim_key_a = f"sim_data_{cmp_a_id}_{cmp_season_sel}"
+        sim_key_b = f"sim_data_{cmp_b_id}_{cmp_season_sel}"
+        if not legs_a and st.session_state.get(sim_key_a):
+            legs_a = st.session_state[sim_key_a]
+        if not legs_b and st.session_state.get(sim_key_b):
+            legs_b = st.session_state[sim_key_b]
+
         if not legs_a:
             st.info(f"🎯 Für **{cmp_a_name}** ({cmp_a_team}) liegen in der Saison **{cmp_season_sel}** noch keine Leg-Aufnahmen vor.")
+            if st.button(f"🎲 Simulation für {cmp_a_name} starten (flüchtig)", key="btn_sim_cmp_a"):
+                import random
+                sim_legs = []
+                for l_idx in range(8):
+                    visits = []
+                    cur_rest = 501
+                    won = (l_idx % 2 == 0)
+                    scores = [int(np.clip(np.random.normal(45.0, 18), 15, 140)) for _ in range(10)]
+                    for sc in scores:
+                        cur_rest -= sc
+                        visits.append({'score': sc, 'rest_score': max(0, cur_rest), 'darts_thrown': 3, 'winner_player_id': cmp_a_id if cur_rest <= 0 else 0})
+                    sim_legs.append(visits)
+                st.session_state[sim_key_a] = sim_legs
+                st.rerun()
         elif not legs_b:
             st.info(f"🎯 Für **{cmp_b_name}** ({cmp_b_team}) liegen in der Saison **{cmp_season_sel}** noch keine Leg-Aufnahmen vor.")
+            if st.button(f"🎲 Simulation für {cmp_b_name} starten (flüchtig)", key="btn_sim_cmp_b"):
+                import random
+                sim_legs = []
+                for l_idx in range(8):
+                    visits = []
+                    cur_rest = 501
+                    won = (l_idx % 2 == 0)
+                    scores = [int(np.clip(np.random.normal(43.0, 18), 15, 140)) for _ in range(10)]
+                    for sc in scores:
+                        cur_rest -= sc
+                        visits.append({'score': sc, 'rest_score': max(0, cur_rest), 'darts_thrown': 3, 'winner_player_id': cmp_b_id if cur_rest <= 0 else 0})
+                    sim_legs.append(visits)
+                st.session_state[sim_key_b] = sim_legs
+                st.rerun()
         else:
             # Beide Spieler haben Daten -> Vergleich berechnen!
             ana_a = compute_player_analytics(cmp_a_id, cmp_a_name, legs_a)

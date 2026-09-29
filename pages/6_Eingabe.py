@@ -4,6 +4,7 @@ import importlib
 import streamlit as st
 import datetime
 import sqlite3
+import pandas as pd
 
 # Sicherstellen, dass das Root-Verzeichnis im Pfad liegt
 _root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -222,7 +223,7 @@ with tab_single:
                 'scores_100': s100_2,
                 'scores_140': s140_2,
                 'scores_180': s180_2,
-                'high_finishes': hf_2,
+                'high_finishes': hf_2 if hf_2 >= 101 else 0,
                 'short_legs': sl_2,
                 'specials_count': sp_2,
                 'season': entry_season
@@ -244,7 +245,7 @@ with tab_single:
                 'scores_100': s_100,
                 'scores_140': s_140,
                 'scores_180': s_180,
-                'high_finishes': high_finishes,
+                'high_finishes': high_finishes if high_finishes >= 101 else 0,
                 'short_legs': short_legs,
                 'specials_count': specials_count,
                 'season': entry_season
@@ -705,7 +706,7 @@ with tab_double_match:
                     'scores_100': dm_s100,
                     'scores_140': dm_s140,
                     'scores_180': dm_s180,
-                    'high_finishes': dm_hf,
+                    'high_finishes': dm_hf if dm_hf >= 101 else 0,
                     'short_legs': dm_sl,
                     'specials_count': dm_sp,
                     'season': entry_season

@@ -1,17 +1,23 @@
 import streamlit as st
 import pandas as pd
-from database import get_players, get_matches, get_settings, get_doubles_specials
+from database import get_players, get_matches, get_settings, get_doubles_specials, get_available_seasons
 from utils import apply_custom_theme, require_login, calculate_match_performance, get_avatar_svg, render_impressum_footer
 
 st.set_page_config(page_title="Lions League - Spieler", page_icon="assets/logo.png", layout="wide")
 apply_custom_theme()
 require_login()
 
-st.title("👤 Spielerprofil & Performance-Analyse")
-st.caption("Einzelauswertung aller Lions-Darter inklusive Saison-Trendgrafik und Portraitfotos.")
+col_sp_title, col_sp_season = st.columns([3.2, 1.3])
+with col_sp_title:
+    st.title("👤 Spielerprofil & Performance-Analyse")
+    st.caption("Einzelauswertung aller Lions-Darter inklusive Saison-Trendgrafik und Portraitfotos.")
+with col_sp_season:
+    available_seasons = get_available_seasons()
+    selected_season = st.selectbox("📅 Saison wählen", ["Alle Saisons"] + available_seasons, index=1 if available_seasons else 0, key="spieler_season_sel")
+    filter_season = None if selected_season == "Alle Saisons" else selected_season
 
 players_df = get_players()
-matches_df = get_matches()
+matches_df = get_matches(season=filter_season)
 settings = get_settings()
 doubles_df = get_doubles_specials()
 
@@ -49,6 +55,7 @@ if not matches_df.empty:
             'Datum': row['match_date_str'],
             'Datum_DT': row['match_date_dt'],
             'Gegner': row['opponent'],
+            'Base_Rating': perf.get('base_rating', perf['total_rating'] - perf['specials_bonus']),
             'Rating': perf['total_rating'],
             'Gesamt Avg': row['avg_total'],
             '9D Avg': row['avg_9'],
@@ -68,8 +75,9 @@ p_matches = res_df[res_df['player_id'] == p_id].sort_values('Datum_DT') if not r
 p_doubles = doubles_df[doubles_df['player_name'] == selected_p_name] if not doubles_df.empty else pd.DataFrame()
 
 d_bonus = len(p_doubles) * 0.5
-avg_single_rating = p_matches['Rating'].mean() if not p_matches.empty else 0.0
-total_pts = avg_single_rating + d_bonus
+e_bonus = (p_matches['Specials'].sum() * 0.5) if not p_matches.empty else 0.0
+avg_single_base = p_matches['Base_Rating'].mean() if not p_matches.empty else 0.0
+total_pts = avg_single_base + e_bonus + d_bonus
 
 # STECKBRIEF HEADER
 st.divider()

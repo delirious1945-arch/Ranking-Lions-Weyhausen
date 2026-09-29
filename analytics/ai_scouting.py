@@ -272,7 +272,7 @@ def generate_ai_player_profile(ana: dict, player_name: str) -> dict:
     elif "Start" in strongest[0]:
         scout_tip = f"{player_name} startet extrem schnell. Wenn man die ersten beiden Aufnahmen pariert, bricht die Kadenz im Mid-Game oft etwas ein – hier liegt die Chance zum Gegenstoss."
     else:
-        scout_tip = f"{player_name} agiert sehr ausgeglichen. Geduldige Match-Strategie und konsequente Bestrafung kleiner Setup-Fehler sind der Schluessel."
+        scout_tip = f"{player_name} agiert sehr ausgeglichen. Geduldige Match-Strategie und konsequente Bestrafung von Fehlern des Gegners sind der Schluessel."
 
     return {
         'archetype': archetype,

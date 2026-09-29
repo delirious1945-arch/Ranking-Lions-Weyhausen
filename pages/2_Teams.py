@@ -1,17 +1,23 @@
 import streamlit as st
 import pandas as pd
-from database import get_players, get_matches, get_settings, get_doubles_specials
+from database import get_players, get_matches, get_settings, get_doubles_specials, get_available_seasons
 from utils import apply_custom_theme, require_login, calculate_match_performance, get_avatar_svg, render_impressum_footer
 
 st.set_page_config(page_title="Lions League - Teams", page_icon="assets/logo.png", layout="wide")
 apply_custom_theme()
 require_login()
 
-st.title("🦁 Team-Kader & Mannschaftsübersicht")
-st.caption("Unsere Mannschaftsaufstellung im SC Weyhausen von 1921 e.V.")
+col_t_title, col_t_season = st.columns([3.2, 1.3])
+with col_t_title:
+    st.title("🦁 Team-Kader & Mannschaftsübersicht")
+    st.caption("Unsere Mannschaftsaufstellung im SC Weyhausen von 1921 e.V.")
+with col_t_season:
+    available_seasons = get_available_seasons()
+    selected_season = st.selectbox("📅 Saison wählen", ["Alle Saisons"] + available_seasons, index=1 if available_seasons else 0, key="teams_season_sel")
+    filter_season = None if selected_season == "Alle Saisons" else selected_season
 
 players_df = get_players()
-matches_df = get_matches()
+matches_df = get_matches(season=filter_season)
 settings = get_settings()
 doubles_df = get_doubles_specials()
 
@@ -21,7 +27,9 @@ if not matches_df.empty:
         perf = calculate_match_performance(row.to_dict(), settings)
         results.append({
             'player_id': row['player_id'],
+            'Base_Rating': perf.get('base_rating', perf['total_rating'] - perf['specials_bonus']),
             'Rating': perf['total_rating'],
+            'Specials': perf['specials_count'],
             'avg_total': row['avg_total'],
             'legs_won': row['legs_won'],
             'legs_lost': row['legs_lost'],
@@ -53,8 +61,9 @@ def render_team_grid(team_name, accent_color):
         if not perf_df.empty:
             p_m = perf_df[perf_df['player_id'] == p_id]
             matches_count = len(p_m)
-            single_rating = p_m['Rating'].mean() if matches_count > 0 else 0.0
-            total_rating = single_rating + doubles_bonus_map.get(p_name, 0.0)
+            single_base = p_m['Base_Rating'].mean() if matches_count > 0 else 0.0
+            e_bonus = (p_m['Specials'].sum() * 0.5) if matches_count > 0 else 0.0
+            total_rating = single_base + e_bonus + doubles_bonus_map.get(p_name, 0.0)
             avg_tot = p_m['avg_total'].mean() if matches_count > 0 else 0.0
             wins = p_m['is_win'].sum()
         else:

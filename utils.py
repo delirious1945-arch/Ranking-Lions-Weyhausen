@@ -55,17 +55,36 @@ def get_player_photo_path(name):
             
     return None
 
+@st.cache_data(show_spinner=False)
+def _get_optimized_avatar_b64(photo_path, max_dim=120):
+    try:
+        from PIL import Image
+        import io
+        with Image.open(photo_path) as img:
+            img = img.convert("RGBA") if photo_path.endswith(".png") else img.convert("RGB")
+            img.thumbnail((max_dim, max_dim), Image.Resampling.LANCZOS)
+            buf = io.BytesIO()
+            if photo_path.endswith(".png"):
+                img.save(buf, format="PNG", optimize=True)
+                ext = "png"
+            else:
+                img.save(buf, format="JPEG", quality=80, optimize=True)
+                ext = "jpeg"
+            return ext, base64.b64encode(buf.getvalue()).decode()
+    except Exception:
+        return ("png" if photo_path.endswith(".png") else "jpeg"), get_base64_image(photo_path)
+
 def get_avatar_svg(name, border_color="#00D4FF", size=70):
     photo_path = get_player_photo_path(name)
     if photo_path and os.path.exists(photo_path):
-        img_b64 = get_base64_image(photo_path)
-        ext = "png" if photo_path.endswith(".png") else "jpeg"
-        return f'<img src="data:image/{ext};base64,{img_b64}" style="width:{size}px;height:{size}px;border-radius:50%;border:3px solid {border_color};box-shadow:0 0 15px {border_color}88;object-fit:cover;display:block;margin:0 auto;" />'
+        target_dim = max(size * 2, 60)
+        ext, img_b64 = _get_optimized_avatar_b64(photo_path, max_dim=target_dim)
+        return f'<img src="data:image/{ext};base64,{img_b64}" style="width:{size}px;height:{size}px;border-radius:50%;border:2px solid {border_color};box-shadow:0 0 10px {border_color}88;object-fit:cover;display:block;margin:0 auto;" />'
     
     parts = name.strip().split()
     initials = "".join([p[0].upper() for p in parts[:2]]) if parts else "🎯"
-    font_s = max(int(size * 0.36), 14)
-    return f'<div style="width:{size}px;height:{size}px;border-radius:50%;background:linear-gradient(135deg,#0A1936,#1E3A8A);border:3px solid {border_color};box-shadow:0 0 15px {border_color}88;display:flex;align-items:center;justify-content:center;color:#FFFFFF;font-weight:800;font-size:{font_s}px;letter-spacing:1px;margin:0 auto;">{initials}</div>'
+    font_s = max(int(size * 0.36), 11)
+    return f'<div style="width:{size}px;height:{size}px;border-radius:50%;background:linear-gradient(135deg,#0A1936,#1E3A8A);border:2px solid {border_color};box-shadow:0 0 10px {border_color}88;display:flex;align-items:center;justify-content:center;color:#FFFFFF;font-weight:800;font-size:{font_s}px;letter-spacing:1px;margin:0 auto;">{initials}</div>'
 
 def apply_custom_theme():
     bg_b64 = get_base64_image("assets/bg.jpg")
@@ -119,129 +138,136 @@ def apply_custom_theme():
     }}
     
     .mockup-card {{
-        background: rgba(8, 20, 48, 0.78);
-        border: 2px solid rgba(0, 212, 255, 0.4);
-        border-radius: 20px;
-        padding: 22px;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 212, 255, 0.18);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
-        margin-bottom: 20px;
+        background: rgba(13, 22, 41, 0.72);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 14px;
+        padding: 20px 22px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        margin-bottom: 16px;
     }}
     
     .card-title {{
-        color: #FFFFFF;
-        font-size: 24px !important;
-        font-weight: 800;
+        color: #F8FAFC;
+        font-size: 14px !important;
+        font-weight: 700;
+        letter-spacing: 0.75px;
+        text-transform: uppercase;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        margin-bottom: 16px;
-        border-bottom: 2px solid rgba(0, 212, 255, 0.2);
-        padding-bottom: 10px;
+        margin-bottom: 14px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        padding-bottom: 8px;
     }}
     
     .card-title span.icon {{
-        color: #00D4FF;
-        font-size: 26px !important;
+        color: #94A3B8;
+        font-size: 14px !important;
     }}
     
     .team-pill-a {{
-        background: linear-gradient(90deg, #00D4FF, #0284C7);
-        color: #050B1A;
-        font-weight: 900;
-        font-size: 20px !important;
-        padding: 10px 18px;
-        border-radius: 25px;
+        background: rgba(0, 212, 255, 0.12);
+        color: #00D4FF;
+        border: 1px solid rgba(0, 212, 255, 0.3);
+        font-weight: 700;
+        font-size: 13px !important;
+        letter-spacing: 0.5px;
+        padding: 6px 14px;
+        border-radius: 8px;
         text-align: center;
-        box-shadow: 0 0 20px rgba(0, 212, 255, 0.6);
     }}
     
     .team-pill-b {{
-        background: linear-gradient(90deg, #1D4ED8, #3B82F6);
-        color: #FFFFFF;
-        font-weight: 900;
-        font-size: 20px !important;
-        padding: 10px 18px;
-        border-radius: 25px;
+        background: rgba(245, 158, 11, 0.12);
+        color: #F59E0B;
+        border: 1px solid rgba(245, 158, 11, 0.3);
+        font-weight: 700;
+        font-size: 13px !important;
+        letter-spacing: 0.5px;
+        padding: 6px 14px;
+        border-radius: 8px;
         text-align: center;
-        box-shadow: 0 0 20px rgba(59, 130, 246, 0.6);
     }}
     
     .battle-row {{
         display: flex;
         align-items: center;
         justify-content: space-between;
-        margin: 8px 0 4px 0;
-        font-size: 18px !important;
+        margin: 6px 0 2px 0;
+        font-size: 13px !important;
     }}
     .battle-val-a {{
         color: #00D4FF;
-        font-weight: 800;
-        font-size: 20px !important;
-        width: 55px;
+        font-weight: 700;
+        font-size: 14px !important;
+        width: 45px;
         text-align: left;
     }}
     .battle-label {{
-        color: #CBD5E1;
-        font-weight: 600;
-        font-size: 17px !important;
+        color: #94A3B8;
+        font-weight: 500;
+        font-size: 12.5px !important;
         flex: 1;
         text-align: center;
     }}
     .battle-val-b {{
-        color: #60A5FA;
-        font-weight: 800;
-        font-size: 20px !important;
-        width: 55px;
+        color: #F59E0B;
+        font-weight: 700;
+        font-size: 14px !important;
+        width: 45px;
         text-align: right;
     }}
     .battle-bar-wrap {{
         display: flex;
-        height: 8px;
-        border-radius: 4px;
-        background: rgba(255, 255, 255, 0.12);
+        height: 4px;
+        border-radius: 2px;
+        background: rgba(255, 255, 255, 0.08);
         overflow: hidden;
-        margin-bottom: 10px;
+        margin-bottom: 8px;
     }}
     .battle-bar-a {{
         background: #00D4FF;
-        box-shadow: 0 0 10px #00D4FF;
         height: 100%;
     }}
     .battle-bar-b {{
-        background: #3B82F6;
-        box-shadow: 0 0 10px #3B82F6;
+        background: #F59E0B;
         height: 100%;
         margin-left: auto;
     }}
     
     .kpi-box {{
-        background: rgba(6, 16, 40, 0.85);
-        border: 2px solid rgba(0, 212, 255, 0.35);
-        border-radius: 18px;
-        padding: 16px 10px;
+        background: rgba(13, 22, 41, 0.65);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        padding: 14px 10px;
         text-align: center;
-        box-shadow: 0 4px 20px rgba(0, 212, 255, 0.15);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
         height: 100%;
+        transition: border-color 0.2s;
+    }}
+    .kpi-box:hover {{
+        border-color: rgba(0, 212, 255, 0.25);
     }}
     .kpi-tag {{
-        font-size: 13px !important;
-        color: #00D4FF;
-        font-weight: 800;
-        letter-spacing: 0.5px;
+        font-size: 11px !important;
+        color: #64748B;
+        font-weight: 700;
+        letter-spacing: 0.6px;
         text-transform: uppercase;
     }}
     .kpi-main {{
-        font-size: 28px !important;
-        font-weight: 900;
-        color: #FFFFFF;
-        margin: 6px 0;
+        font-size: 23px !important;
+        font-weight: 800;
+        color: #F8FAFC;
+        margin: 4px 0 2px 0;
+        letter-spacing: -0.3px;
     }}
     .kpi-sub {{
-        font-size: 15px !important;
-        color: #CBD5E1;
-        font-weight: 600;
+        font-size: 12px !important;
+        color: #94A3B8;
+        font-weight: 500;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -424,7 +450,7 @@ def render_sidebar_auth():
 def render_impressum_footer():
     st.markdown("""
     <div style='text-align: center; margin-top: 50px; color: #94A3B8; font-size: 14px; border-top: 1px solid rgba(0,212,255,0.2); padding-top: 20px;'>
-        🦁 <b>Lions Weyhausen</b> • Dartsport im Sportclub Weyhausen von 1921 e.V.<br>
+        🦁 <b>Lions Weyhausen</b> • Dartsport im Sportclub Weyhausen von 1921 e.V. • <span style="color: #00D4FF; font-weight: 700;">Version V1.10</span><br>
         Spartenleiter: Sebastian Kirste (<code>sebastian.kirste@sc-weyhausen.de</code>)<br>
         <span style="font-size: 12px; color: #64748B;">© 2026 SC Weyhausen e.V. • Impressum & Datenschutz</span>
     </div>
@@ -543,7 +569,8 @@ def calculate_match_performance(match, settings):
     weighted_avg18 = pts_avg18 * (settings['avg18_weight'] / 100.0)
     weighted_scores = pts_scores * (settings['scores_weight'] / 100.0)
     
-    total_rating = weighted_win + weighted_avg + weighted_avg9 + weighted_avg18 + weighted_scores + specials_bonus
+    base_rating = weighted_win + weighted_avg + weighted_avg9 + weighted_avg18 + weighted_scores
+    total_rating = base_rating + specials_bonus
     
     return {
         'win_ratio': win_ratio,
@@ -553,6 +580,7 @@ def calculate_match_performance(match, settings):
         'pts_avg9': pts_avg9,
         'pts_avg18': pts_avg18,
         'pts_scores': pts_scores,
+        'base_rating': round(base_rating, 2),
         'specials_count': specials,
         'specials_bonus': specials_bonus,
         'total_rating': round(total_rating, 2)

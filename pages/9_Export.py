@@ -31,10 +31,10 @@ def generate_export_html():
     if not matches_df.empty:
         for p_id in matches_df['player_id'].unique():
             p_matches = matches_df[matches_df['player_id'] == p_id]
-            perf_sum = 0
+            base_sum = 0
             for _, m in p_matches.iterrows():
                 perf = calculate_match_performance(m, settings)
-                perf_sum += perf['total_rating']
+                base_sum += perf.get('base_rating', perf['total_rating'] - perf['specials_bonus'])
                 
             p_name = p_matches.iloc[0]['player_name']
             p_team = p_matches.iloc[0]['team']
@@ -52,7 +52,7 @@ def generate_export_html():
             high_finishes = p_matches['high_finishes'].max()
             specials_sum = p_matches['specials_count'].sum()
             
-            rating = (perf_sum / len(p_matches)) + doubles_bonus
+            rating = (base_sum / len(p_matches)) + (specials_sum * 0.5) + doubles_bonus
             
             results.append({
                 'Spieler': p_name,

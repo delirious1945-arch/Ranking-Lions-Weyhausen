@@ -435,6 +435,8 @@ def get_all_analytics_matches(
     if season and season != "Alle Saisons":
         conditions.append("m.season = ?")
         params.append(season)
+    else:
+        conditions.append("m.season != '2025/2026'")
         
     where_clause = "WHERE " + " AND ".join(conditions) if conditions else ""
     query = f'''
@@ -453,6 +455,8 @@ def get_player_leg_visits(player_id: int, season: Optional[str] = None) -> List[
     if season and season != "Alle Saisons":
         conditions.append("m.season = ?")
         params.append(season)
+    else:
+        conditions.append("m.season != '2025/2026'")
         
     where_clause = "WHERE " + " AND ".join(conditions)
     query = f'''
@@ -894,8 +898,9 @@ def import_analyzer_csv_data(
                 s100 = sum(1 for s in v_all if 100 <= s <= 139)
                 s140 = sum(1 for s in v_all if 140 <= s <= 179)
                 s180 = sum(1 for s in v_all if s == 180)
-                hf = tgt['hf']
-                sl = tgt['sl']
+                hf = tgt.get('hf', 0)
+                sl = tgt.get('sl', 0)
+                hf_val = hf if hf >= 101 else 0
                 specials = s180 + (1 if hf >= 101 else 0) + sl
                 
                 if tgt['is_double']:
@@ -913,7 +918,7 @@ def import_analyzer_csv_data(
                         'scores_100': s100,
                         'scores_140': s140,
                         'scores_180': s180,
-                        'high_finishes': hf,
+                        'high_finishes': hf_val,
                         'short_legs': sl,
                         'specials_count': specials,
                         'season': season
@@ -1015,7 +1020,7 @@ def import_analyzer_csv_data(
                         'scores_100': s100,
                         'scores_140': s140,
                         'scores_180': s180,
-                        'high_finishes': hf,
+                        'high_finishes': hf_val,
                         'short_legs': sl,
                         'specials_count': specials,
                         'season': season

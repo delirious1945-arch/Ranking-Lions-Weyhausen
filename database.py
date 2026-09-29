@@ -78,7 +78,7 @@ def execute_query(sql, params=()):
     if is_postgres():
         from sqlalchemy import text
         engine = get_engine()
-        pg_sql = sql.replace('?', '%s')
+        pg_sql = sql.replace('%', '%%').replace('?', '%s')
         pg_sql = pg_sql.replace('INTEGER PRIMARY KEY AUTOINCREMENT', 'SERIAL PRIMARY KEY')
         pg_sql = pg_sql.replace('INTEGER PRIMARY KEY CHECK (id = 1)', 'INTEGER PRIMARY KEY')
         conn = get_connection()
@@ -100,7 +100,7 @@ def query_df(sql, params=()):
         engine = get_engine()
         with engine.connect() as conn:
             if params:
-                pg_sql = sql.replace('?', '%s')
+                pg_sql = sql.replace('%', '%%').replace('?', '%s')
                 raw_conn = conn.connection
                 df = pd.read_sql_query(pg_sql, raw_conn, params=params)
             else:
@@ -279,13 +279,13 @@ def update_settings(win_w, avg_w, avg9_w, avg18_w, scores_w):
     ''', (win_w, avg_w, avg9_w, avg18_w, scores_w))
 
 def get_available_seasons():
-    """Gibt eine sortierte Liste aller verfügbaren Saisons zurück."""
+    """Gibt eine sortierte Liste aller verfügbaren Saisons zurück (Vorsaison 2025/2026 temporär ausgeblendet)."""
     q = """
-        SELECT DISTINCT season FROM matches WHERE season IS NOT NULL AND season != ''
+        SELECT DISTINCT season FROM matches WHERE season IS NOT NULL AND season != '' AND season != '2025/2026'
         UNION
-        SELECT DISTINCT season FROM doubles_matches WHERE season IS NOT NULL AND season != ''
+        SELECT DISTINCT season FROM doubles_matches WHERE season IS NOT NULL AND season != '' AND season != '2025/2026'
         UNION
-        SELECT DISTINCT season FROM doubles_specials WHERE season IS NOT NULL AND season != ''
+        SELECT DISTINCT season FROM doubles_specials WHERE season IS NOT NULL AND season != '' AND season != '2025/2026'
     """
     try:
         df = query_df(q)
@@ -330,8 +330,8 @@ def update_match(match_id, match_data):
         match_id
     ))
 
-def get_matches(season=None):
-    if season:
+def get_matches(season="2026/2027"):
+    if season and season != "Alle Saisons":
         query = '''
             SELECT m.*, p.name as player_name, p.team 
             FROM matches m
@@ -345,6 +345,7 @@ def get_matches(season=None):
             SELECT m.*, p.name as player_name, p.team 
             FROM matches m
             JOIN players p ON m.player_id = p.id
+            WHERE m.season != '2025/2026'
             ORDER BY m.match_date DESC, m.id DESC
         '''
         return query_df(query)
@@ -368,8 +369,8 @@ def add_doubles_match(match_data):
         match_data.get('season', '2026/2027')
     ))
 
-def get_doubles_matches(season=None):
-    if season:
+def get_doubles_matches(season="2026/2027"):
+    if season and season != "Alle Saisons":
         query = '''
             SELECT m.*, p1.name as p1_name, p1.team as team, p2.name as p2_name
             FROM doubles_matches m
@@ -385,6 +386,7 @@ def get_doubles_matches(season=None):
             FROM doubles_matches m
             JOIN players p1 ON m.player1_id = p1.id
             JOIN players p2 ON m.player2_id = p2.id
+            WHERE m.season != '2025/2026'
             ORDER BY m.match_date DESC, m.id DESC
         '''
         return query_df(query)
@@ -424,8 +426,8 @@ def update_doubles_special(special_id, player_id, partner_name, opponent_team, m
         WHERE id = ?
     ''', (player_id, partner_name, opponent_team, match_date, special_type, description, season, special_id))
 
-def get_doubles_specials(season=None):
-    if season:
+def get_doubles_specials(season="2026/2027"):
+    if season and season != "Alle Saisons":
         query = '''
             SELECT d.*, p.name as player_name, p.team
             FROM doubles_specials d
@@ -439,9 +441,59 @@ def get_doubles_specials(season=None):
             SELECT d.*, p.name as player_name, p.team
             FROM doubles_specials d
             JOIN players p ON d.player_id = p.id
+            WHERE d.season != '2025/2026'
             ORDER BY d.match_date DESC, d.id DESC
         '''
         return query_df(query)
 
 def delete_doubles_special(special_id):
     execute_query("DELETE FROM doubles_specials WHERE id = ?", (special_id,))
+
+def get_top_26er_players(season="2026/2027", limit=2):
+    """
+    Gibt die Top-Spieler mit den meisten 26er Scores ('Breakfast') zurück.
+    Berücksichtigt ausschließlich reguläre Einzel-Matches (keine Doppel-Spiele)
+    und schließt Checkouts (Restscore = 0) aus.
+    """
+    try:
+        if season and season != "Alle Saisons":
+            query = '''
+                SELECT p.id as player_id, p.name as player_name, p.team, COUNT(v.id) as count_26
+                FROM analytics_visits v
+                JOIN analytics_legs l ON v.leg_id = l.id
+                JOIN analytics_matches m ON l.match_id = m.id
+                JOIN players p ON v.player_id = p.id
+                WHERE v.score = 26 
+                  AND m.season = ?
+                  AND m.player_a_name NOT LIKE '%&%'
+                  AND m.player_b_name NOT LIKE '%&%'
+                  AND v.rest_score > 0
+                GROUP BY p.id, p.name, p.team
+                ORDER BY count_26 DESC, p.name ASC
+                LIMIT ?
+            '''
+            df = query_df(query, (season, limit))
+            if not df.empty:
+                return df
+        
+        # Fallback auf alle erfassten Einzel-Matches
+        query = '''
+            SELECT p.id as player_id, p.name as player_name, p.team, COUNT(v.id) as count_26
+            FROM analytics_visits v
+            JOIN analytics_legs l ON v.leg_id = l.id
+            JOIN analytics_matches m ON l.match_id = m.id
+            JOIN players p ON v.player_id = p.id
+            WHERE v.score = 26
+              AND m.player_a_name NOT LIKE '%&%'
+              AND m.player_b_name NOT LIKE '%&%'
+              AND v.rest_score > 0
+            GROUP BY p.id, p.name, p.team
+            ORDER BY count_26 DESC, p.name ASC
+            LIMIT ?
+        '''
+        return query_df(query, (limit,))
+    except Exception as e:
+        print(f"Hinweis get_top_26er_players: {e}")
+        return pd.DataFrame(columns=['player_id', 'player_name', 'team', 'count_26'])
+
+
