@@ -452,7 +452,7 @@ def get_doubles_specials(season="2026/2027"):
 def delete_doubles_special(special_id):
     execute_query("DELETE FROM doubles_specials WHERE id = ?", (special_id,))
 
-def get_top_26er_players(season="2026/2027", limit=2):
+def get_top_26er_players(season="2026/2027", limit=3):
     """
     Gibt die Top-Spieler mit den meisten 26er Scores ('Breakfast') zurück.
     Berücksichtigt ausschließlich reguläre Einzel-Matches (keine Doppel-Spiele)

@@ -448,79 +448,49 @@ else:
 </div>
 </div>""", unsafe_allow_html=True)
         
-        # Meiste 26er Scores ("Breakfast") - Top 2 Spieler Ranking
+        # Lustiges 26er Ranking ("Die Frühstücks-Könige" / "The Breakfast Club") - 3 Spieler
         try:
-            df_26 = get_top_26er_players(season=selected_season, limit=2)
+            df_26 = get_top_26er_players(season=selected_season, limit=3)
         except Exception:
             df_26 = pd.DataFrame()
             
-        p26_1 = df_26.iloc[0] if len(df_26) > 0 else None
-        p26_2 = df_26.iloc[1] if len(df_26) > 1 else None
+        rows_list = []
+        rank_styles = [
+            {"num_color": "#EF4444", "bg": "linear-gradient(90deg, rgba(239, 68, 68, 0.12), rgba(255,255,255,0.02))", "border": "rgba(239, 68, 68, 0.35)", "cnt_color": "#EF4444"},
+            {"num_color": "#F59E0B", "bg": "rgba(245, 158, 11, 0.05)", "border": "rgba(245, 158, 11, 0.25)", "cnt_color": "#F59E0B"},
+            {"num_color": "#94A3B8", "bg": "rgba(255, 255, 255, 0.02)", "border": "rgba(148, 163, 184, 0.2)", "cnt_color": "#CBD5E1"}
+        ]
         
-        if p26_1 is not None and p26_2 is not None:
-            av_26_1 = get_avatar_svg(p26_1['player_name'], "#F59E0B", 36)
-            av_26_2 = get_avatar_svg(p26_2['player_name'], "#94A3B8", 34)
-            name_26_1 = get_short_name(p26_1['player_name'])
-            name_26_2 = get_short_name(p26_2['player_name'])
-            team_26_1 = p26_1['team']
-            team_26_2 = p26_2['team']
-            cnt_26_1 = int(p26_1['count_26'])
-            cnt_26_2 = int(p26_2['count_26'])
+        for idx, row in df_26.iterrows():
+            r_idx = min(idx, len(rank_styles) - 1)
+            style = rank_styles[r_idx]
+            p_name = get_short_name(row['player_name'])
+            av = get_avatar_svg(row['player_name'], style["num_color"], 34)
+            t_name = row['team']
+            cnt = int(row['count_26'])
             
-            p26_rows_html = f"""
-<div style="display: flex; align-items: center; justify-content: space-between; background: linear-gradient(90deg, rgba(245, 158, 11, 0.12), rgba(255,255,255,0.02)); padding: 6px 12px; border-radius: 9px; border: 1px solid rgba(245, 158, 11, 0.35);">
+            rows_list.append(f"""<div style="display: flex; align-items: center; justify-content: space-between; background: {style['bg']}; padding: 5px 12px; border-radius: 9px; border: 1px solid {style['border']};">
     <div style="display: flex; align-items: center; gap: 8px;">
-        <div style="font-size: 14px; font-weight: 900; color: #F59E0B; width: 16px;">1.</div>
-        {av_26_1}
+        <div style="font-size: 13.5px; font-weight: 800; color: {style['num_color']}; width: 16px;">{idx + 1}.</div>
+        {av}
         <div>
-            <div style="font-size: 13.5px; font-weight: 700; color: #FFFFFF; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{name_26_1}</div>
-            <div style="font-size: 10.5px; color: #94A3B8; font-weight: 600;">{team_26_1}</div>
+            <div style="font-size: 13px; font-weight: 700; color: #FFFFFF; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{p_name}</div>
+            <div style="font-size: 10px; color: #94A3B8; font-weight: 600;">{t_name}</div>
         </div>
     </div>
     <div style="text-align: right;">
-        <div style="font-size: 16px; font-weight: 900; color: #F59E0B;">{cnt_26_1}×</div>
-        <div style="font-size: 9.5px; color: #64748B; font-weight: 600; text-transform: uppercase;">26er Scores</div>
+        <div style="font-size: 15px; font-weight: 800; color: {style['cnt_color']};">{cnt}×</div>
+        <div style="font-size: 9px; color: #64748B; font-weight: 600; text-transform: uppercase;">26er Scores</div>
     </div>
-</div>
-<div style="display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.02); padding: 6px 12px; border-radius: 9px; border: 1px solid rgba(148, 163, 184, 0.2);">
-    <div style="display: flex; align-items: center; gap: 8px;">
-        <div style="font-size: 13.5px; font-weight: 800; color: #94A3B8; width: 16px;">2.</div>
-        {av_26_2}
-        <div>
-            <div style="font-size: 13px; font-weight: 700; color: #FFFFFF; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{name_26_2}</div>
-            <div style="font-size: 10.5px; color: #94A3B8; font-weight: 600;">{team_26_2}</div>
-        </div>
-    </div>
-    <div style="text-align: right;">
-        <div style="font-size: 15px; font-weight: 800; color: #CBD5E1;">{cnt_26_2}×</div>
-        <div style="font-size: 9.5px; color: #64748B; font-weight: 600; text-transform: uppercase;">26er Scores</div>
-    </div>
-</div>"""
-        elif p26_1 is not None:
-            av_26_1 = get_avatar_svg(p26_1['player_name'], "#F59E0B", 36)
-            name_26_1 = get_short_name(p26_1['player_name'])
-            team_26_1 = p26_1['team']
-            cnt_26_1 = int(p26_1['count_26'])
-            p26_rows_html = f"""
-<div style="display: flex; align-items: center; justify-content: space-between; background: linear-gradient(90deg, rgba(245, 158, 11, 0.12), rgba(255,255,255,0.02)); padding: 6px 12px; border-radius: 9px; border: 1px solid rgba(245, 158, 11, 0.35);">
-    <div style="display: flex; align-items: center; gap: 8px;">
-        <div style="font-size: 14px; font-weight: 900; color: #F59E0B; width: 16px;">1.</div>
-        {av_26_1}
-        <div>
-            <div style="font-size: 13.5px; font-weight: 700; color: #FFFFFF;">{name_26_1}</div>
-            <div style="font-size: 10.5px; color: #94A3B8; font-weight: 600;">{team_26_1}</div>
-        </div>
-    </div>
-    <div style="text-align: right;">
-        <div style="font-size: 16px; font-weight: 900; color: #F59E0B;">{cnt_26_1}×</div>
-        <div style="font-size: 9.5px; color: #64748B; font-weight: 600; text-transform: uppercase;">26er Scores</div>
-    </div>
-</div>"""
+</div>""")
+
+        if rows_list:
+            p26_rows_html = "\n".join(rows_list)
         else:
-            p26_rows_html = '<div style="color:#94A3B8;text-align:center;padding:10px;font-size:12px;">Noch keine 26er Scores erfasst</div>'
+            p26_rows_html = '<div style="color:#94A3B8;text-align:center;padding:10px;font-size:12px;">Noch kein Frühstück serviert ☕</div>'
 
         st.markdown(f"""<div class="mockup-card" style="margin-bottom: 12px; padding: 12px 18px;">
-<div class="card-title" style="font-size: 14px !important; margin-bottom: 8px; padding-bottom: 4px;"><span>🎯 MEISTE 26er SCORES</span><span style="font-size: 11px; color: #F59E0B; font-weight: 700; background: rgba(245, 158, 11, 0.12); padding: 2px 8px; border-radius: 6px; border: 1px solid rgba(245, 158, 11, 0.3);">TOP 2</span></div>
+<div class="card-title" style="font-size: 14px !important; margin-bottom: 8px; padding-bottom: 4px;"><span>🥐 DIE FRÜHSTÜCKS-KÖNIGE (26er)</span><span style="font-size: 11px; color: #EF4444; font-weight: 700; background: rgba(239, 68, 68, 0.12); padding: 2px 8px; border-radius: 6px; border: 1px solid rgba(239, 68, 68, 0.3);">FLOP 3 🎯</span></div>
 <div style="display: flex; flex-direction: column; gap: 6px;">
 {p26_rows_html}
 </div>
