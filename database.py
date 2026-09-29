@@ -62,7 +62,10 @@ def get_engine():
     db_url = get_db_url()
     if db_url and _engine is None:
         from sqlalchemy import create_engine
-        _engine = create_engine(db_url, pool_pre_ping=True)
+        sqlalchemy_url = db_url
+        if sqlalchemy_url.startswith("postgresql://"):
+            sqlalchemy_url = sqlalchemy_url.replace("postgresql://", "postgresql+psycopg2://", 1)
+        _engine = create_engine(sqlalchemy_url, pool_pre_ping=True)
     return _engine
 
 def get_connection():
