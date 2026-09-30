@@ -18,13 +18,13 @@ with tab_a:
         <h3 style='color: #FFFFFF; font-size: 24px;'>3K Darts - 2. Kreisklasse 07</h3>
         <p style='color: #94A3B8; font-size: 16px;'>Wähle die gewünschte offizielle Ansicht im 3K-Verbandsportal:</p>
         <div style='display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 15px;'>
-            <a href='https://portal.3k-darts.com/frontend/events/10/event/247/table' target='_blank' style='background: linear-gradient(90deg, #00D4FF, #0284C7); color: #050B1A; font-weight: 800; padding: 12px 24px; border-radius: 10px; text-decoration: none; font-size: 16px; box-shadow: 0 0 15px rgba(0, 212, 255, 0.4);'>
+            <a href='https://portal.3k-darts.com/frontend/events/10/event/1343/table' target='_blank' style='background: linear-gradient(90deg, #00D4FF, #0284C7); color: #050B1A; font-weight: 800; padding: 12px 24px; border-radius: 10px; text-decoration: none; font-size: 16px; box-shadow: 0 0 15px rgba(0, 212, 255, 0.4);'>
                 📊 Tabelle öffnen
             </a>
-            <a href='https://portal.3k-darts.com/frontend/events/10/event/247/statistics/statistics' target='_blank' style='background: rgba(0, 212, 255, 0.15); border: 1px solid #00D4FF; color: #00D4FF; font-weight: 700; padding: 12px 24px; border-radius: 10px; text-decoration: none; font-size: 16px;'>
+            <a href='https://portal.3k-darts.com/frontend/events/10/event/1343/statistics/statistics' target='_blank' style='background: rgba(0, 212, 255, 0.15); border: 1px solid #00D4FF; color: #00D4FF; font-weight: 700; padding: 12px 24px; border-radius: 10px; text-decoration: none; font-size: 16px;'>
                 🎯 Rangliste & Averages
             </a>
-            <a href='https://portal.3k-darts.com/frontend/events/10/event/247/performances' target='_blank' style='background: rgba(245, 158, 11, 0.15); border: 1px solid #F59E0B; color: #FBBF24; font-weight: 700; padding: 12px 24px; border-radius: 10px; text-decoration: none; font-size: 16px;'>
+            <a href='https://portal.3k-darts.com/frontend/events/10/event/1343/performances' target='_blank' style='background: rgba(245, 158, 11, 0.15); border: 1px solid #F59E0B; color: #FBBF24; font-weight: 700; padding: 12px 24px; border-radius: 10px; text-decoration: none; font-size: 16px;'>
                 ⭐ Bestleistungen & Specials
             </a>
         </div>
@@ -39,13 +39,13 @@ with tab_b:
         <h3 style='color: #FFFFFF; font-size: 24px;'>3K Darts - 2. Kreisklasse 11</h3>
         <p style='color: #94A3B8; font-size: 16px;'>Wähle die gewünschte offizielle Ansicht im 3K-Verbandsportal:</p>
         <div style='display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 15px;'>
-            <a href='https://portal.3k-darts.com/frontend/events/10/event/251/table' target='_blank' style='background: linear-gradient(90deg, #1D4ED8, #3B82F6); color: #FFFFFF; font-weight: 800; padding: 12px 24px; border-radius: 10px; text-decoration: none; font-size: 16px; box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);'>
+            <a href='https://portal.3k-darts.com/frontend/events/10/event/1347/table' target='_blank' style='background: linear-gradient(90deg, #1D4ED8, #3B82F6); color: #FFFFFF; font-weight: 800; padding: 12px 24px; border-radius: 10px; text-decoration: none; font-size: 16px; box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);'>
                 📊 Tabelle öffnen
             </a>
-            <a href='https://portal.3k-darts.com/frontend/events/10/event/251/statistics/statistics' target='_blank' style='background: rgba(59, 130, 246, 0.15); border: 1px solid #3B82F6; color: #93C5FD; font-weight: 700; padding: 12px 24px; border-radius: 10px; text-decoration: none; font-size: 16px;'>
+            <a href='https://portal.3k-darts.com/frontend/events/10/event/1347/statistics/statistics' target='_blank' style='background: rgba(59, 130, 246, 0.15); border: 1px solid #3B82F6; color: #93C5FD; font-weight: 700; padding: 12px 24px; border-radius: 10px; text-decoration: none; font-size: 16px;'>
                 🎯 Rangliste & Averages
             </a>
-            <a href='https://portal.3k-darts.com/frontend/events/10/event/251/performances' target='_blank' style='background: rgba(245, 158, 11, 0.15); border: 1px solid #F59E0B; color: #FBBF24; font-weight: 700; padding: 12px 24px; border-radius: 10px; text-decoration: none; font-size: 16px;'>
+            <a href='https://portal.3k-darts.com/frontend/events/10/event/1347/performances' target='_blank' style='background: rgba(245, 158, 11, 0.15); border: 1px solid #F59E0B; color: #FBBF24; font-weight: 700; padding: 12px 24px; border-radius: 10px; text-decoration: none; font-size: 16px;'>
                 ⭐ Bestleistungen & Specials
             </a>
         </div>

@@ -65,7 +65,9 @@ if not matches_df.empty:
             'Is_Win': 1 if perf['win_ratio'] == 100 else 0,
             'Specials': perf['specials_count'],
             '180er': row['scores_180'],
-            'High Finishes': row['high_finishes']
+            'High Finishes': row['high_finishes'],
+            'Total_Scores': row['scores_80'] + row['scores_100'] + row['scores_140'] + row['scores_180'],
+            'Total_Legs': row['legs_won'] + row['legs_lost']
         })
     res_df = pd.DataFrame(calc_results)
 else:
@@ -78,6 +80,11 @@ d_bonus = len(p_doubles) * 0.5
 e_bonus = (p_matches['Specials'].sum() * 0.5) if not p_matches.empty else 0.0
 avg_single_base = p_matches['Base_Rating'].mean() if not p_matches.empty else 0.0
 total_pts = avg_single_base + e_bonus + d_bonus
+
+# High Scores (80+) Kennzahlen berechnen
+total_scores_cnt = int(p_matches['Total_Scores'].sum()) if not p_matches.empty else 0
+total_legs_cnt = int(p_matches['Total_Legs'].sum()) if not p_matches.empty else 0
+avg_scores_per_leg = (total_scores_cnt / total_legs_cnt) if total_legs_cnt > 0 else 0.0
 
 # STECKBRIEF HEADER
 st.divider()
@@ -94,12 +101,13 @@ with c_info:
 
 # KPI SPALTEN
 st.markdown("<br>", unsafe_allow_html=True)
-m1, m2, m3, m4, m5 = st.columns(5)
+m1, m2, m3, m4, m5, m6 = st.columns(6)
 with m1: st.metric("Gesamt-Punkte", f"{total_pts:.2f} Pkt", delta=f"+{d_bonus:.1f} Doppel" if d_bonus > 0 else None)
 with m2: st.metric("Gesamt-Average", f"{p_matches['Gesamt Avg'].mean():.1f}" if not p_matches.empty else "-")
 with m3: st.metric("Einzel-Bilanz", f"{p_matches['Is_Win'].sum()} / {len(p_matches)}" if not p_matches.empty else "0 / 0")
-with m4: st.metric("Höchstes Finish", f"{int(p_matches['High Finishes'].max())}" if (not p_matches.empty and p_matches['High Finishes'].max() > 0) else "-")
-with m5: st.metric("Specials Gesamt", f"{int(p_matches['Specials'].sum() if not p_matches.empty else 0)} + {len(p_doubles)} Dbl")
+with m4: st.metric("Ø Scores / Leg", f"{avg_scores_per_leg:.2f}", delta=f"{total_scores_cnt} Scores (80+)" if total_scores_cnt > 0 else None, delta_color="off")
+with m5: st.metric("Höchstes Finish", f"{int(p_matches['High Finishes'].max())}" if (not p_matches.empty and p_matches['High Finishes'].max() > 0) else "-")
+with m6: st.metric("Specials Gesamt", f"{int(p_matches['Specials'].sum() if not p_matches.empty else 0)} + {len(p_doubles)} Dbl")
 
 # PERFORMANCE-ENTWICKLUNGSGRAFIK (TREND-CHART)
 st.markdown("<br>", unsafe_allow_html=True)

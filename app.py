@@ -28,7 +28,7 @@ st.set_page_config(
     page_title="Lions League - SC Weyhausen", 
     layout="wide", 
     page_icon="assets/logo.png",
-    initial_sidebar_state="expanded" if is_auth else "collapsed"
+    initial_sidebar_state="collapsed"
 )
 init_db()
 apply_custom_theme()
@@ -72,11 +72,11 @@ if not st.session_state.get('authenticated', False):
     
     /* 3. Formular: Große, elegante Karte in der rechten Spalte */
     [data-testid="stForm"] {
-        background: rgba(10, 20, 42, 0.88) !important;
-        border: 1.5px solid rgba(0, 212, 255, 0.4) !important;
+        background: rgba(11, 16, 29, 0.92) !important;
+        border: 1.5px solid rgba(59, 130, 246, 0.35) !important;
         border-radius: 20px !important;
         padding: 26px 36px 22px 36px !important;
-        box-shadow: 0 18px 45px rgba(0, 0, 0, 0.65), 0 0 32px rgba(0, 212, 255, 0.18) !important;
+        box-shadow: 0 18px 45px rgba(0, 0, 0, 0.75), 0 0 32px rgba(37, 99, 235, 0.15) !important;
         backdrop-filter: blur(16px) !important;
     }
     [data-testid="stForm"] label {
@@ -103,12 +103,14 @@ if not st.session_state.get('authenticated', False):
         font-size: 17px !important;
         font-weight: 700 !important;
         margin-top: 8px !important;
+        background: #2563EB !important;
+        border-color: #3B82F6 !important;
     }
     </style>
     """, unsafe_allow_html=True)
     
     logo_b64 = get_base64_image("assets/logo.png")
-    logo_html = f'<img src="data:image/png;base64,{logo_b64}" style="width: 250px; max-width: 95%; height: auto; object-fit: contain; display: inline-block; filter: drop-shadow(0 0 28px rgba(0, 212, 255, 0.45)) drop-shadow(0 8px 20px rgba(0, 0, 0, 0.7));">' if logo_b64 else '<div style="width: 190px; height: 190px; border-radius: 12px; background: #00D4FF;"></div>'
+    logo_html = f'<img src="data:image/png;base64,{logo_b64}" style="width: 250px; max-width: 95%; height: auto; object-fit: contain; display: inline-block; filter: drop-shadow(0 0 28px rgba(37, 99, 235, 0.4)) drop-shadow(0 8px 20px rgba(0, 0, 0, 0.7));">' if logo_b64 else '<div style="width: 190px; height: 190px; border-radius: 12px; background: #2563EB;"></div>'
     
     col_left, col_right = st.columns([1.0, 1.2], gap="large")
     
@@ -118,10 +120,10 @@ if not st.session_state.get('authenticated', False):
             <div style="display: block; margin: 0 auto 10px auto;">
                 {logo_html}
             </div>
-            <h1 style='color: #FFFFFF; font-size: 32px; font-weight: 800; letter-spacing: 2px; margin: 4px 0 2px 0; text-shadow: 0 0 26px rgba(0,212,255,0.6);'>
+            <h1 style='color: #FFFFFF; font-size: 32px; font-weight: 800; letter-spacing: 2px; margin: 4px 0 2px 0; text-shadow: 0 0 26px rgba(37,99,235,0.5);'>
                 LIONS LEAGUE
             </h1>
-            <p style='color: #00D4FF; font-size: 14px; font-weight: 700; margin: 0 0 4px 0; letter-spacing: 0.8px; text-transform: uppercase; line-height: 1.3;'>
+            <p style='color: #60A5FA; font-size: 14px; font-weight: 700; margin: 0 0 4px 0; letter-spacing: 0.8px; text-transform: uppercase; line-height: 1.3;'>
                 SC WEYHAUSEN VON 1921 E.V.<br>SPARTE DARTSPORT
             </p>
             <p style='color: #94A3B8; font-size: 12.5px; margin: 2px 0 0 0;'>
@@ -208,19 +210,15 @@ render_sidebar_auth()
 logo_b64 = get_base64_image("assets/logo.png")
 available_seasons = get_available_seasons()
 
-# Top Header Bar mit Saison-Auswahl & Versionsanzeige
-col_head_title, col_head_season = st.columns([3.5, 1.1])
+# Sub-Header Bar mit Saison-Auswahl
+col_head_title, col_head_season = st.columns([3.5, 1.1], vertical_alignment="center")
 with col_head_title:
-    st.markdown(f"""<div style="background: rgba(13, 22, 41, 0.72); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; padding: 12px 22px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35); backdrop-filter: blur(14px); margin-bottom: 18px; height: 62px;">
-<div style="display: flex; align-items: center; gap: 12px;">
-<img src="data:image/png;base64,{logo_b64}" width="38" height="38" style="border-radius: 6px; object-fit: contain;" />
-<span style="font-weight: 700; font-size: 17px; color: #F8FAFC; letter-spacing: 0.5px;">LIONS LEAGUE • SC WEYHAUSEN</span>
+    st.markdown("""<div style="background: rgba(11, 16, 29, 0.85); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 10px 18px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35); margin-bottom: 12px;">
+<div style="display: flex; align-items: center; gap: 10px;">
+<span style="font-weight: 800; font-size: 16px; color: #FFFFFF; letter-spacing: 0.5px;">🎯 LIGA DASHBOARD</span>
+<span style="color: #94A3B8; font-size: 13px; font-weight: 500;">• Gesamtwertung & Team-Statistiken</span>
 </div>
-<div style="display: flex; align-items: center; gap: 8px;">
-<span style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.12); color: #94A3B8; font-weight: 600; font-size: 11.5px; padding: 3px 10px; border-radius: 6px; letter-spacing: 0.5px;">
-v1.10
-</span>
-</div>
+<span style="background: rgba(37, 99, 235, 0.15); border: 1px solid rgba(59, 130, 246, 0.35); color: #60A5FA; font-weight: 700; font-size: 11px; padding: 3px 8px; border-radius: 6px; letter-spacing: 0.5px;">OFFIZIELL</span>
 </div>""", unsafe_allow_html=True)
 
 with col_head_season:
@@ -310,8 +308,12 @@ else:
         avg18_a = team_a_df['18D Avg'].mean() if not team_a_df.empty else 0.0
         avg18_b = team_b_df['18D Avg'].mean() if not team_b_df.empty else 0.0
         
-        hf_a = team_a_df['High Finishes'].max() if not team_a_df.empty else 0
-        hf_b = team_b_df['High Finishes'].max() if not team_b_df.empty else 0
+        hf_single_a = (team_a_df['High Finishes'] >= 101).sum() if not team_a_df.empty else 0
+        hf_single_b = (team_b_df['High Finishes'] >= 101).sum() if not team_b_df.empty else 0
+        hf_double_a = len(doubles_df[(doubles_df['team'] == 'A-Team') & (doubles_df['special_type'] == 'High Finish')]) if not doubles_df.empty else 0
+        hf_double_b = len(doubles_df[(doubles_df['team'] == 'B-Team') & (doubles_df['special_type'] == 'High Finish')]) if not doubles_df.empty else 0
+        hf_a = int(hf_single_a + hf_double_a)
+        hf_b = int(hf_single_b + hf_double_b)
         
         sp_single_a = team_a_df['Specials'].sum() if not team_a_df.empty else 0
         sp_single_b = team_b_df['Specials'].sum() if not team_b_df.empty else 0
@@ -347,13 +349,18 @@ else:
         total_legs_b = int(single_legs_b) + int(double_legs_b)
         
         def calc_bar(val_a, val_b):
-            tot = (val_a + val_b) if (val_a + val_b) > 0 else 1
-            pct_a = min(max(int((val_a / tot) * 100), 20), 80)
+            if val_a == 0 and val_b == 0:
+                return 50, 50
+            tot = (val_a + val_b)
+            pct_a = int(round((val_a / tot) * 100))
+            pct_a = min(max(pct_a, 0), 100)
             return pct_a, 100 - pct_a
 
         bar_avg_a, bar_avg_b = calc_bar(avg_a, avg_b)
         bar_a9_a, bar_a9_b = calc_bar(avg9_a, avg9_b)
         bar_a18_a, bar_a18_b = calc_bar(avg18_a, avg18_b)
+        bar_hf_a, bar_hf_b = calc_bar(hf_a, hf_b)
+        bar_sp_a, bar_sp_b = calc_bar(sp_a, sp_b)
         bar_sets_a, bar_sets_b = calc_bar(total_wins_a, total_wins_b)
         bar_leg_single_a, bar_leg_single_b = calc_bar(int(single_legs_a), int(single_legs_b))
         bar_leg_double_a, bar_leg_double_b = calc_bar(int(double_legs_a), int(double_legs_b))
@@ -376,11 +383,11 @@ else:
 <div class="battle-row"><span class="battle-val-a">{avg18_a:.1f}</span><span class="battle-label">Durchschnitts-Average 18 Darts</span><span class="battle-val-b">{avg18_b:.1f}</span></div>
 <div class="battle-bar-wrap"><div class="battle-bar-a" style="width: {bar_a18_a}%;"></div><div class="battle-bar-b" style="width: {bar_a18_b}%;"></div></div>
 
-<div class="battle-row"><span class="battle-val-a">{int(hf_a)}</span><span class="battle-label">High Finish</span><span class="battle-val-b">{int(hf_b)}</span></div>
-<div class="battle-bar-wrap"><div class="battle-bar-a" style="width: 50%;"></div><div class="battle-bar-b" style="width: 50%;"></div></div>
+<div class="battle-row"><span class="battle-val-a">{int(hf_a)}</span><span class="battle-label">Anzahl High Finish</span><span class="battle-val-b">{int(hf_b)}</span></div>
+<div class="battle-bar-wrap"><div class="battle-bar-a" style="width: {bar_hf_a}%;"></div><div class="battle-bar-b" style="width: {bar_hf_b}%;"></div></div>
 
 <div class="battle-row"><span class="battle-val-a">{int(sp_a)}</span><span class="battle-label">Specials</span><span class="battle-val-b">{int(sp_b)}</span></div>
-<div class="battle-bar-wrap"><div class="battle-bar-a" style="width: 50%;"></div><div class="battle-bar-b" style="width: 50%;"></div></div>
+<div class="battle-bar-wrap"><div class="battle-bar-a" style="width: {bar_sp_a}%;"></div><div class="battle-bar-b" style="width: {bar_sp_b}%;"></div></div>
 
 <div class="battle-row"><span class="battle-val-a">{total_wins_a}</span><span class="battle-label">Gewonnene Sets</span><span class="battle-val-b">{total_wins_b}</span></div>
 <div class="battle-bar-wrap"><div class="battle-bar-a" style="width: {bar_sets_a}%;"></div><div class="battle-bar-b" style="width: {bar_sets_b}%;"></div></div>
@@ -393,6 +400,29 @@ else:
 
 <div class="battle-row"><span class="battle-val-a">{total_legs_a}</span><span class="battle-label">Gewonnene Legs Gesamt</span><span class="battle-val-b">{total_legs_b}</span></div>
 <div class="battle-bar-wrap"><div class="battle-bar-a" style="width: {bar_leg_total_a}%;"></div><div class="battle-bar-b" style="width: {bar_leg_total_b}%;"></div></div>
+</div>""", unsafe_allow_html=True)
+
+        # Saison Highlights direkt unter Team-Battle (Spalte 1)
+        tot_specials = (res_df['Specials'].sum() if not res_df.empty else 0) + len(doubles_df)
+        
+        st.markdown(f"""<div class="mockup-card" style="margin-top: 12px; margin-bottom: 0px; padding: 12px 18px;">
+<div class="card-title" style="font-size: 14px !important; margin-bottom: 8px; padding-bottom: 4px;"><span>SAISON HIGHLIGHTS</span><span style="font-size: 11.5px; color: #64748B; font-weight: 600;">STATISTIK</span></div>
+<div style="display: flex; flex-direction: column; gap: 6px;">
+<div style="display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.02); padding: 7px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06);">
+<div>
+<div style="font-size: 10.5px; color: #64748B; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase;">Specials Gesamt (Einzel & Doppel)</div>
+<div style="font-size: 13.5px; font-weight: 700; color: #FFFFFF;">{int(tot_specials)} Specials</div>
+</div>
+<span style="font-size: 12px; color: #CBD5E1; font-weight: 700;">•</span>
+</div>
+<div style="display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.02); padding: 7px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06);">
+<div>
+<div style="font-size: 10.5px; color: #64748B; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase;">Geworfene Doppel-Specials</div>
+<div style="font-size: 13.5px; font-weight: 700; color: #E2E8F0;">{len(doubles_df)} Doppel-Specials (+{len(doubles_df)*0.5:.1f} Pkt)</div>
+</div>
+<span style="font-size: 12px; color: #CBD5E1; font-weight: 700;">•</span>
+</div>
+</div>
 </div>""", unsafe_allow_html=True)
 
     # ====================================================
@@ -448,9 +478,9 @@ else:
 </div>
 </div>""", unsafe_allow_html=True)
         
-        # Lustiges 26er Ranking ("26er Könige - Ist zwar keine 180, aber trotzdem ein echter Klassiker") - 3 Spieler
+        # Lustiges 26er Ranking ("26er Könige - Ist zwar keine 180, aber trotzdem ein echter Klassiker") - Top 3 Ränge
         try:
-            df_26 = get_top_26er_players(season=selected_season, limit=3)
+            df_26 = get_top_26er_players(season=selected_season, limit=12)
         except Exception:
             df_26 = pd.DataFrame()
             
@@ -461,24 +491,51 @@ else:
             {"num_color": "#D97706", "bg": "rgba(217, 119, 6, 0.05)", "border": "rgba(217, 119, 6, 0.25)", "cnt_color": "#F59E0B"}
         ]
         
-        for idx, row in df_26.iterrows():
-            r_idx = min(idx, len(rank_styles) - 1)
-            style = rank_styles[r_idx]
-            p_name = get_short_name(row['player_name'])
-            av = get_avatar_svg(row['player_name'], style["num_color"], 34)
-            t_name = row['team']
-            cnt = int(row['count_26'])
+        # Nach Anzahl 26er gruppieren, um Top-3 Ränge zu bilden (bei Gleichstand Spieler in einem Feld vereinen)
+        if not df_26.empty:
+            ranked_groups = []
+            for cnt_val, grp in df_26.groupby('count_26', sort=False):
+                ranked_groups.append({
+                    'count_26': cnt_val,
+                    'players': grp.to_dict('records')
+                })
             
-            rows_list.append(f"""<div style="display: flex; align-items: center; justify-content: space-between; background: {style['bg']}; padding: 5px 12px; border-radius: 9px; border: 1px solid {style['border']};">
-    <div style="display: flex; align-items: center; gap: 8px;">
-        <div style="font-size: 13.5px; font-weight: 800; color: {style['num_color']}; width: 16px;">{idx + 1}.</div>
-        {av}
-        <div>
-            <div style="font-size: 13px; font-weight: 700; color: #FFFFFF; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{p_name}</div>
-            <div style="font-size: 10px; color: #94A3B8; font-weight: 600;">{t_name}</div>
+            for rank_idx, grp_data in enumerate(ranked_groups[:3]):
+                display_rank = rank_idx + 1
+                r_style_idx = min(rank_idx, len(rank_styles) - 1)
+                style = rank_styles[r_style_idx]
+                plist = grp_data['players']
+                cnt = int(grp_data['count_26'])
+                
+                # Avatare & Namen generieren
+                if len(plist) == 1:
+                    av_html = get_avatar_svg(plist[0]['player_name'], style["num_color"], 34)
+                    names_str = get_short_name(plist[0]['player_name'])
+                    team_str = plist[0]['team']
+                else:
+                    # Mehrere Spieler mit gleicher Trefferanzahl in einem Feld vereint
+                    av_items = []
+                    for i_p, p in enumerate(plist):
+                        z_i = len(plist) - i_p
+                        ml = "0px" if i_p == 0 else "-12px"
+                        av_svg = get_avatar_svg(p['player_name'], style["num_color"], 30)
+                        av_items.append(f'<div style="position: relative; z-index: {z_i}; margin-left: {ml};">{av_svg}</div>')
+                    av_html = f'<div style="display: flex; align-items: center; margin-right: 4px;">{"".join(av_items)}</div>'
+                    
+                    names_str = " & ".join([get_short_name(p['player_name']) for p in plist])
+                    teams_unique = list(dict.fromkeys([p['team'] for p in plist]))
+                    team_str = " & ".join(teams_unique)
+                
+                rows_list.append(f"""<div style="display: flex; align-items: center; justify-content: space-between; background: {style['bg']}; padding: 5px 12px; border-radius: 9px; border: 1px solid {style['border']};">
+    <div style="display: flex; align-items: center; gap: 8px; min-width: 0;">
+        <div style="font-size: 13.5px; font-weight: 800; color: {style['num_color']}; min-width: 16px; flex-shrink: 0;">{display_rank}.</div>
+        <div style="flex-shrink: 0;">{av_html}</div>
+        <div style="min-width: 0;">
+            <div style="font-size: 13px; font-weight: 700; color: #FFFFFF; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="{names_str}">{names_str}</div>
+            <div style="font-size: 10px; color: #94A3B8; font-weight: 600;">{team_str}</div>
         </div>
     </div>
-    <div style="text-align: right;">
+    <div style="text-align: right; flex-shrink: 0; margin-left: 8px;">
         <div style="font-size: 15px; font-weight: 800; color: {style['cnt_color']};">{cnt}×</div>
         <div style="font-size: 9px; color: #64748B; font-weight: 600; text-transform: uppercase;">26er Scores</div>
     </div>
@@ -489,34 +546,11 @@ else:
         else:
             p26_rows_html = '<div style="color:#94A3B8;text-align:center;padding:10px;font-size:12px;">Noch kein 26er Klassiker geworfen 🎯</div>'
 
-        st.markdown(f"""<div class="mockup-card" style="margin-bottom: 12px; padding: 12px 18px;">
+        st.markdown(f"""<div class="mockup-card" style="margin-bottom: 0px; padding: 12px 18px;">
 <div class="card-title" style="font-size: 14px !important; margin-bottom: 2px; padding-bottom: 2px;"><span>👑 26er KÖNIGE</span><span style="font-size: 10.5px; color: #F59E0B; font-weight: 700; background: rgba(245, 158, 11, 0.12); padding: 2px 8px; border-radius: 6px; border: 1px solid rgba(245, 158, 11, 0.3);">KLASSIKER 🎯</span></div>
 <div style="font-size: 11px; color: #94A3B8; font-style: italic; margin-bottom: 8px;">Ist zwar keine 180, aber trotzdem ein echter Klassiker.</div>
 <div style="display: flex; flex-direction: column; gap: 6px;">
 {p26_rows_html}
-</div>
-</div>""", unsafe_allow_html=True)
-        
-        # Bild 1: Saison Highlights kompakter
-        tot_specials = (res_df['Specials'].sum() if not res_df.empty else 0) + len(doubles_df)
-        
-        st.markdown(f"""<div class="mockup-card" style="margin-bottom: 0px; padding: 12px 18px;">
-<div class="card-title" style="font-size: 14px !important; margin-bottom: 8px; padding-bottom: 4px;"><span>SAISON HIGHLIGHTS</span><span style="font-size: 11.5px; color: #64748B; font-weight: 600;">STATISTIK</span></div>
-<div style="display: flex; flex-direction: column; gap: 6px;">
-<div style="display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.02); padding: 7px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06);">
-<div>
-<div style="font-size: 10.5px; color: #64748B; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase;">Specials Gesamt (Einzel & Doppel)</div>
-<div style="font-size: 13.5px; font-weight: 700; color: #FFFFFF;">{int(tot_specials)} Specials</div>
-</div>
-<span style="font-size: 12px; color: #00D4FF; font-weight: 700;">•</span>
-</div>
-<div style="display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.02); padding: 7px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06);">
-<div>
-<div style="font-size: 10.5px; color: #64748B; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase;">Geworfene Doppel-Specials</div>
-<div style="font-size: 13.5px; font-weight: 700; color: #00D4FF;">{len(doubles_df)} Doppel-Specials (+{len(doubles_df)*0.5:.1f} Pkt)</div>
-</div>
-<span style="font-size: 12px; color: #34D399; font-weight: 700;">•</span>
-</div>
 </div>
 </div>""", unsafe_allow_html=True)
 
@@ -626,30 +660,50 @@ else:
         best_doppel_names = f"{get_short_name(best_dm_row['p1_name'])} & {get_short_name(best_dm_row['p2_name'])}"
 
     st.markdown(f"""<div style="display: flex; gap: 12px; width: 100%; margin-top: 14px; margin-bottom: 8px;">
-<div class="kpi-box" style="flex: 1; min-width: 0;">
-<div class="kpi-tag">HIGHEST AVERAGE</div>
-<div class="kpi-main" style="color: #00D4FF;">Ø {best_avg_val}</div>
-<div class="kpi-sub">{get_short_name(best_avg_row['Spieler']) if best_avg_row is not None else '-'}</div>
+<div class="kpi-box" style="flex: 1; min-width: 0; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between;">
+    <div style="text-align: left; overflow: hidden; padding-right: 8px;">
+        <div class="kpi-tag" style="margin-bottom: 3px;">HIGHEST AVERAGE</div>
+        <div class="kpi-sub" style="font-size: 13px; color: #94A3B8; font-weight: 600;">{get_short_name(best_avg_row['Spieler']) if best_avg_row is not None else '-'}</div>
+    </div>
+    <div style="text-align: right; flex-shrink: 0;">
+        <div class="kpi-main" style="color: #FFFFFF; font-size: 24px; font-weight: 800; margin: 0;">Ø {best_avg_val}</div>
+    </div>
 </div>
-<div class="kpi-box" style="flex: 1; min-width: 0;">
-<div class="kpi-tag">MEISTE 180er</div>
-<div class="kpi-main" style="color: #F8FAFC;">{best_180_val}</div>
-<div class="kpi-sub">{best_180_name}</div>
+<div class="kpi-box" style="flex: 1; min-width: 0; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between;">
+    <div style="text-align: left; overflow: hidden; padding-right: 8px;">
+        <div class="kpi-tag" style="margin-bottom: 3px;">MEISTE 180er</div>
+        <div class="kpi-sub" style="font-size: 13px; color: #94A3B8; font-weight: 600;">{best_180_name}</div>
+    </div>
+    <div style="text-align: right; flex-shrink: 0;">
+        <div class="kpi-main" style="color: #FFFFFF; font-size: 24px; font-weight: 800; margin: 0;">{best_180_val}</div>
+    </div>
 </div>
-<div class="kpi-box" style="flex: 1; min-width: 0;">
-<div class="kpi-tag">HIGH FINISH</div>
-<div class="kpi-main" style="color: #00D4FF;">{int(max_hf_row['High Finishes']) if (max_hf_row is not None and max_hf_row['High Finishes'] > 0) else '0'}</div>
-<div class="kpi-sub">{get_short_name(max_hf_row['Spieler']) if (max_hf_row is not None and max_hf_row['High Finishes'] > 0) else 'Noch offen'}</div>
+<div class="kpi-box" style="flex: 1; min-width: 0; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between;">
+    <div style="text-align: left; overflow: hidden; padding-right: 8px;">
+        <div class="kpi-tag" style="margin-bottom: 3px;">HIGH FINISH</div>
+        <div class="kpi-sub" style="font-size: 13px; color: #94A3B8; font-weight: 600;">{get_short_name(max_hf_row['Spieler']) if (max_hf_row is not None and max_hf_row['High Finishes'] > 0) else 'Noch offen'}</div>
+    </div>
+    <div style="text-align: right; flex-shrink: 0;">
+        <div class="kpi-main" style="color: #FFFFFF; font-size: 24px; font-weight: 800; margin: 0;">{int(max_hf_row['High Finishes']) if (max_hf_row is not None and max_hf_row['High Finishes'] > 0) else '0'}</div>
+    </div>
 </div>
-<div class="kpi-box" style="flex: 1; min-width: 0;">
-<div class="kpi-tag">SHORT GAME</div>
-<div class="kpi-main" style="color: #34D399;">{short_game_val}</div>
-<div class="kpi-sub">{short_game_name}</div>
+<div class="kpi-box" style="flex: 1; min-width: 0; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between;">
+    <div style="text-align: left; overflow: hidden; padding-right: 8px;">
+        <div class="kpi-tag" style="margin-bottom: 3px;">SHORT GAME</div>
+        <div class="kpi-sub" style="font-size: 13px; color: #94A3B8; font-weight: 600;">{short_game_name}</div>
+    </div>
+    <div style="text-align: right; flex-shrink: 0;">
+        <div class="kpi-main" style="color: #FFFFFF; font-size: 24px; font-weight: 800; margin: 0;">{short_game_val}</div>
+    </div>
 </div>
-<div class="kpi-box" style="flex: 1; min-width: 0;">
-<div class="kpi-tag">BESTES DOPPEL</div>
-<div class="kpi-main" style="color: #F59E0B;">Ø {best_doppel_avg:.1f}</div>
-<div class="kpi-sub">{best_doppel_names}</div>
+<div class="kpi-box" style="flex: 1; min-width: 0; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between;">
+    <div style="text-align: left; overflow: hidden; padding-right: 8px;">
+        <div class="kpi-tag" style="margin-bottom: 3px;">BESTES DOPPEL</div>
+        <div class="kpi-sub" style="font-size: 13px; color: #94A3B8; font-weight: 600;">{best_doppel_names}</div>
+    </div>
+    <div style="text-align: right; flex-shrink: 0;">
+        <div class="kpi-main" style="color: #FFFFFF; font-size: 24px; font-weight: 800; margin: 0;">Ø {best_doppel_avg:.1f}</div>
+    </div>
 </div>
 </div>""", unsafe_allow_html=True)
 
@@ -767,97 +821,8 @@ Zusammensetzung der Ranking-Punkte nach offizieller Gewichtung der Lions League
 </div>
 </div>""", unsafe_allow_html=True)
 
-    # ----------------------------------------------------
-    # DETAILANALYSE INKLUSIVE DOPPEL-SPECIALS
-    # ----------------------------------------------------
-    with st.expander("🔍 Spieler-Detailanalyse & Match-Historie"):
-        _p_df = get_players()
-        if not _p_df.empty and 'team' in _p_df.columns:
-            all_players_list = sorted(_p_df[_p_df['team'].isin(['A-Team', 'B-Team'])]['name'].tolist())
-        else:
-            all_players_list = sorted(_p_df['name'].tolist()) if not _p_df.empty else []
-        detail_player = st.selectbox("Spieler für Detailanalyse", all_players_list, key="deep_dive_player")
-        
-        p_matches = res_df[res_df['Spieler'] == detail_player].sort_values('Match_ID') if not res_df.empty else pd.DataFrame()
-        p_doubles = doubles_df[doubles_df['player_name'] == detail_player] if not doubles_df.empty else pd.DataFrame()
-        
-        # Doppel-Matches des Spielers ermitteln
-        if not doubles_matches_df.empty:
-            p_dm = doubles_matches_df[(doubles_matches_df['p1_name'] == detail_player) | (doubles_matches_df['p2_name'] == detail_player)].copy()
-        else:
-            p_dm = pd.DataFrame()
-        dm_wins = len(p_dm[p_dm['legs_won'] > p_dm['legs_lost']]) if not p_dm.empty else 0
-        dm_count = len(p_dm)
-        single_wins = int(p_matches['Is_Win'].sum()) if not p_matches.empty else 0
-        single_count = len(p_matches)
-        
-        d_bonus = len(p_doubles) * 0.5
-        single_avg_rating = p_matches['Rating'].mean() if not p_matches.empty else 0.0
-        total_rating = single_avg_rating + d_bonus
-        
-        p_c1, p_c2, p_c3, p_c4 = st.columns(4)
-        with p_c1: st.metric("Gesamt-Rating", f"{total_rating:.2f} Pkt", delta=f"+{d_bonus:.1f} Pkt (Doppel)" if d_bonus > 0 else None)
-        with p_c2: st.metric("Gesamt-Average (Einzel)", f"{p_matches['Gesamt Avg'].mean():.1f}" if not p_matches.empty else "-")
-        with p_c3: st.metric("Siege (Einzel | Doppel)", f"🎯 {single_wins}/{single_count}  •  👥 {dm_wins}/{dm_count}")
-        with p_c4: st.metric("Specials (Einzel + Doppel)", f"{int(p_matches['Specials'].sum() if not p_matches.empty else 0)} + {len(p_doubles)}")
-            
-        if not p_matches.empty:
-            st.markdown("#### 🎯 Einzel-Matches")
-            st.dataframe(
-                p_matches[['Datum', 'Gegner', 'Sieg', 'Legs_Won', 'Legs_Lost', 'Rating', 'Gesamt Avg', '9D Avg', '18D Avg', 'Scores/Leg', 'Specials']].style.format({
-                    'Rating': '{:.2f} Pkt',
-                    'Gesamt Avg': '{:.1f}',
-                    '9D Avg': '{:.1f}',
-                    '18D Avg': '{:.1f}',
-                    'Scores/Leg': '{:.2f}'
-                }),
-                use_container_width=True,
-                hide_index=True
-            )
-            
-        if not p_dm.empty:
-            st.markdown("#### 👥 Doppel-Matches")
-            p_dm['Datum'] = pd.to_datetime(p_dm['match_date']).dt.strftime('%d.%m.%Y')
-            p_dm['Partner'] = p_dm.apply(lambda r: r['p2_name'] if r['p1_name'] == detail_player else r['p1_name'], axis=1)
-            p_dm['Gegner'] = p_dm['opponent']
-            p_dm['Sieg'] = p_dm.apply(lambda r: '✅' if r['legs_won'] > r['legs_lost'] else '❌', axis=1)
-            p_dm['Legs'] = p_dm.apply(lambda r: f"{int(r['legs_won'])}:{int(r['legs_lost'])}", axis=1)
-            p_dm['Scores (80+)'] = p_dm['scores_80'] + p_dm['scores_100'] + p_dm['scores_140'] + p_dm['scores_180']
-            
-            st.dataframe(
-                p_dm[['Datum', 'Partner', 'Gegner', 'Sieg', 'Legs', 'avg_total', 'avg_9', 'avg_18', 'Scores (80+)', 'scores_180', 'high_finishes', 'short_legs', 'specials_count']].rename(columns={
-                    'avg_total': 'Gesamt Avg',
-                    'avg_9': '9D Avg',
-                    'avg_18': '18D Avg',
-                    'scores_180': '180er',
-                    'high_finishes': 'High Finish',
-                    'short_legs': 'Short Legs',
-                    'specials_count': 'Specials'
-                }).style.format({
-                    'Gesamt Avg': '{:.1f}',
-                    '9D Avg': '{:.1f}',
-                    '18D Avg': '{:.1f}'
-                }),
-                use_container_width=True,
-                hide_index=True
-            )
-            
-        if not p_doubles.empty:
-            st.markdown("#### 🤝 Im Doppel geworfene Specials (+0,5 Pkt Bonus)")
-            st.dataframe(
-                p_doubles[['match_date', 'special_type', 'partner_name', 'opponent_team', 'description']].rename(columns={
-                    'match_date': 'Datum',
-                    'special_type': 'Geworfenes Special',
-                    'partner_name': 'Teampartner',
-                    'opponent_team': 'Gegnerisches Team',
-                    'description': 'Details / Notiz'
-                }),
-                use_container_width=True,
-                hide_index=True
-            )
-
 # Footer
 st.markdown("""<div style='text-align: center; margin-top: 30px; color: #64748B; font-size: 12px; border-top: 1px solid rgba(0,212,255,0.15); padding-top: 15px;'>
-🦁 <b>Lions Weyhausen</b> • Dartsport im Sportclub Weyhausen von 1921 e.V. • <span style="color: #00D4FF; font-weight: 700;">Version V1.10</span><br>
+🦁 <b>Lions Weyhausen</b> • Dartsport im Sportclub Weyhausen von 1921 e.V. • <span style="color: #00D4FF; font-weight: 700;">Version V1.2</span><br>
 Spartenleiter: Sebastian Kirste (<code>sebastian.kirste@sc-weyhausen.de</code>)
 </div>""", unsafe_allow_html=True)

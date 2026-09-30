@@ -133,13 +133,17 @@ def generate_export_html():
         total_legs_b = int(single_legs_b) + int(double_legs_b)
         
         def calc_bar(val_a, val_b):
-            tot = (val_a + val_b) if (val_a + val_b) > 0 else 1
-            pct_a = min(max(int((val_a / tot) * 100), 20), 80)
+            if val_a == 0 and val_b == 0:
+                return 50, 50
+            tot = (val_a + val_b)
+            pct_a = int(round((val_a / tot) * 100))
+            pct_a = min(max(pct_a, 0), 100)
             return pct_a, 100 - pct_a
 
         bar_avg_a, bar_avg_b = calc_bar(avg_a, avg_b)
         bar_a9_a, bar_a9_b = calc_bar(avg9_a, avg9_b)
         bar_a18_a, bar_a18_b = calc_bar(avg18_a, avg18_b)
+        bar_sp_a, bar_sp_b = calc_bar(sp_a, sp_b)
         bar_sets_a, bar_sets_b = calc_bar(total_wins_a, total_wins_b)
         bar_leg_single_a, bar_leg_single_b = calc_bar(int(single_legs_a), int(single_legs_b))
         bar_leg_double_a, bar_leg_double_b = calc_bar(int(double_legs_a), int(double_legs_b))
@@ -164,7 +168,7 @@ def generate_export_html():
             <div class="battle-bar-wrap"><div class="battle-bar-a" style="width: {bar_a18_a}%;"></div><div class="battle-bar-b" style="width: {bar_a18_b}%;"></div></div>
 
             <div class="battle-row"><span class="battle-val-a">{int(sp_a)}</span><span class="battle-label">Specials</span><span class="battle-val-b">{int(sp_b)}</span></div>
-            <div class="battle-bar-wrap"><div class="battle-bar-a" style="width: 50%;"></div><div class="battle-bar-b" style="width: 50%;"></div></div>
+            <div class="battle-bar-wrap"><div class="battle-bar-a" style="width: {bar_sp_a}%;"></div><div class="battle-bar-b" style="width: {bar_sp_b}%;"></div></div>
 
             <div class="battle-row"><span class="battle-val-a">{total_wins_a}</span><span class="battle-label">Gewonnene Sets</span><span class="battle-val-b">{total_wins_b}</span></div>
             <div class="battle-bar-wrap"><div class="battle-bar-a" style="width: {bar_sets_a}%;"></div><div class="battle-bar-b" style="width: {bar_sets_b}%;"></div></div>

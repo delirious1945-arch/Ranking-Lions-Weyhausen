@@ -124,7 +124,7 @@ st.markdown(f"""<div style="background: rgba(8, 20, 48, 0.85); border: 1px solid
 </div>
 <div style="display: flex; align-items: center; gap: 10px;">
 <span style="background: rgba(0, 212, 255, 0.15); border: 1px solid #00D4FF; color: #00D4FF; font-weight: 800; font-size: 14px; padding: 6px 14px; border-radius: 8px; letter-spacing: 0.5px;">
-🟢 Version V1.10
+🟢 Version V1.2
 </span>
 </div>
 </div>""", unsafe_allow_html=True)

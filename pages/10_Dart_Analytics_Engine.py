@@ -3,8 +3,8 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
-from utils import apply_custom_theme, require_login, render_impressum_footer, get_avatar_svg, get_short_name
-from database import get_players, get_available_seasons
+from utils import apply_custom_theme, require_login, render_impressum_footer, get_avatar_svg, get_short_name, calculate_match_performance
+from database import get_players, get_available_seasons, get_matches, get_doubles_matches, get_doubles_specials, get_settings
 from analytics.config import get_sample_size_rating
 from analytics.data_access import get_player_leg_visits, get_all_analytics_matches, get_analytics_match_details
 from analytics.basic_metrics import (
@@ -44,7 +44,7 @@ st.markdown("""
         </div>
         <div style="display: flex; align-items: center; gap: 10px;">
             <span style="background: rgba(0, 212, 255, 0.15); border: 1px solid #00D4FF; border-radius: 8px; padding: 6px 14px; color: #00D4FF; font-weight: 800; font-size: 13px;">
-                🟢 ENGINE V1.10
+                🟢 ENGINE V1.2
             </span>
         </div>
     </div>
@@ -135,9 +135,10 @@ def compute_player_analytics(player_id: int, player_name: str, legs_visits: list
 # ----------------------------------------------------
 # MAIN TABS: EINZELSPIELER VS. SPIELER-VERGLEICH
 # ----------------------------------------------------
-tab_single, tab_compare = st.tabs([
+tab_single, tab_compare, tab_matrix = st.tabs([
     "👤 Einzelspieler-Analyse", 
-    "⚔️ Spieler-Vergleich (Head-to-Head)"
+    "⚔️ Spieler-Vergleich (Head-to-Head)",
+    "📊 Spieler-Vergleich & Analyse"
 ])
 
 # ====================================================
@@ -1221,5 +1222,264 @@ with tab_compare:
                     dw_b = len(dlegs) - dw_a if dlegs else 0
                     with st.expander(f"🎯 Direktes Match {dm_disp} | {dm_dt} | {dm_pa} vs {dm_pb} (Ergebnis: {dw_a}:{dw_b})", expanded=True):
                         st.write(f"Matchdetails ID {dmid}: {len(dlegs)} Legs gespielt.")
+
+
+with tab_matrix:
+    st.subheader("📊 Spieler-Vergleich & Head-to-Head Analyse")
+    st.caption("Wähle beliebig viele Spieler aus und filtere die gewünschten Statistiken für einen direkten Leistungsvergleich.")
+    
+    # 1. Saisonfilter für die Analyse
+    avail_seasons = get_available_seasons()
+    col_an_s1, col_an_s2 = st.columns([2, 3])
+    with col_an_s1:
+        an_season = st.selectbox("Saison für die Analyse", ["Alle Saisons"] + avail_seasons, index=1 if avail_seasons else 0, key="analysis_season")
+    
+    season_filter = None if an_season == "Alle Saisons" else an_season
+    
+    # Daten laden
+    p_df = get_players()
+    if not p_df.empty:
+        p_df = p_df[p_df['team'].isin(['A-Team', 'B-Team'])].copy()
+    m_df = get_matches(season=season_filter)
+    dm_df = get_doubles_matches(season=season_filter)
+    ds_df = get_doubles_specials(season=season_filter)
+    cfg = get_settings()
+    
+    # Performance pro Einzel-Match berechnen
+    calc_matches = []
+    if not m_df.empty:
+        for _, m_row in m_df.iterrows():
+            m_dict = m_row.to_dict()
+            p_res = calculate_match_performance(m_dict, cfg)
+            p_res['player_name'] = m_row['player_name']
+            p_res['team'] = m_row['team']
+            p_res['Is_Win'] = 1 if m_row['legs_won'] > m_row['legs_lost'] else 0
+            p_res['Legs_Won'] = int(m_row['legs_won'])
+            p_res['Legs_Lost'] = int(m_row['legs_lost'])
+            p_res['Gesamt Avg'] = float(m_row['avg_total'])
+            p_res['9D Avg'] = float(m_row['avg_9'])
+            p_res['18D Avg'] = float(m_row['avg_18'])
+            p_res['Scores_80'] = int(m_row['scores_80'])
+            p_res['Scores_100'] = int(m_row['scores_100'])
+            p_res['Scores_140'] = int(m_row['scores_140'])
+            p_res['Scores_180'] = int(m_row['scores_180'])
+            p_res['High Finishes'] = int(m_row['high_finishes'])
+            p_res['Short Legs'] = int(m_row['short_legs'])
+            p_res['Specials'] = int(m_row.get('specials_count', 0) or 0)
+            p_res['Rating'] = float(p_res['total_rating'])
+            calc_matches.append(p_res)
+    calc_df = pd.DataFrame(calc_matches)
+    
+    # Gesamte Spielerstatistiken zusammenstellen
+    player_stats_dict = {}
+    for _, prow in p_df.iterrows():
+        pname = prow['name']
+        pteam = prow['team']
+        
+        # Einzel Matches
+        pm = calc_df[calc_df['player_name'] == pname] if not calc_df.empty else pd.DataFrame()
+        # Doppel Matches (als Spieler 1 oder Spieler 2)
+        pdm = dm_df[(dm_df['p1_name'] == pname) | (dm_df['p2_name'] == pname)] if not dm_df.empty else pd.DataFrame()
+        # Doppel Specials
+        pds = ds_df[ds_df['player_name'] == pname] if not ds_df.empty else pd.DataFrame()
+        
+        e_games = len(pm)
+        e_wins = int(pm['Is_Win'].sum()) if not pm.empty else 0
+        e_winrate = (e_wins / e_games * 100) if e_games > 0 else 0.0
+        e_lw = int(pm['Legs_Won'].sum()) if not pm.empty else 0
+        e_ll = int(pm['Legs_Lost'].sum()) if not pm.empty else 0
+        e_ldiff = e_lw - e_ll
+        
+        avg_tot = float(pm['Gesamt Avg'].mean()) if not pm.empty else 0.0
+        avg_9 = float(pm['9D Avg'].mean()) if not pm.empty else 0.0
+        avg_18 = float(pm['18D Avg'].mean()) if not pm.empty else 0.0
+        best_avg = float(pm['Gesamt Avg'].max()) if not pm.empty else 0.0
+        
+        s80 = int(pm['Scores_80'].sum()) if not pm.empty else 0
+        s100 = int(pm['Scores_100'].sum()) if not pm.empty else 0
+        s140 = int(pm['Scores_140'].sum()) if not pm.empty else 0
+        s180_single = int(pm['Scores_180'].sum()) if not pm.empty else 0
+        s180_double = len(pds[pds['special_type'].str.contains('180')]) if not pds.empty else 0
+        s180 = s180_single + s180_double
+        
+        total_scores = s80 + s100 + s140 + s180
+        total_legs_played = (e_lw + e_ll) if (e_lw + e_ll) > 0 else 1
+        score_ratio = (total_scores / total_legs_played) if e_games > 0 else 0.0
+        
+        hf = int(pm['High Finishes'].max()) if not pm.empty else 0
+        sl = int(pm['Short Legs'].sum()) if not pm.empty else 0
+        single_spec = int(pm['Specials'].sum()) if not pm.empty else 0
+        double_spec = len(pds)
+        total_spec = single_spec + double_spec
+        
+        rating_single = float(pm['Rating'].mean()) if not pm.empty else 0.0
+        bonus_double = double_spec * 0.5
+        rating_total = rating_single + bonus_double
+        
+        # Doppel Stats
+        d_games = len(pdm)
+        d_wins = len(pdm[pdm['legs_won'] > pdm['legs_lost']]) if not pdm.empty else 0
+        d_winrate = (d_wins / d_games * 100) if d_games > 0 else 0.0
+        d_lw = int(pdm['legs_won'].sum()) if not pdm.empty else 0
+        d_ll = int(pdm['legs_lost'].sum()) if not pdm.empty else 0
+        d_avg = float(pdm['avg_total'].mean()) if not pdm.empty else 0.0
+        
+        player_stats_dict[pname] = {
+            'Team': pteam,
+            'Gesamt-Rating': rating_total,
+            'Einzel-Rating (Ø)': rating_single,
+            'Doppel-Bonus (Pkt)': bonus_double,
+            'Einzel-Spiele': e_games,
+            'Einzel-Siege': e_wins,
+            'Einzel Win-Rate (%)': e_winrate,
+            'Einzel Legs (+)': e_lw,
+            'Einzel Legs (-)': e_ll,
+            'Einzel Leg-Diff': e_ldiff,
+            'Gesamt-Average (Ø)': avg_tot,
+            '9-Dart Average (Ø)': avg_9,
+            '18-Dart Average (Ø)': avg_18,
+            'Bester Match-Average': best_avg,
+            '80+ Scores': s80,
+            '100+ Scores': s100,
+            '140+ Scores': s140,
+            '180er Highscores': s180,
+            'Scores pro Leg (80+)': score_ratio,
+            'Höchstes Finish': hf,
+            'Short Legs (≤18 Darts)': sl,
+            'Specials Gesamt': total_spec,
+            'Doppel-Specials': double_spec,
+            'Doppel-Spiele': d_games,
+            'Doppel-Siege': d_wins,
+            'Doppel Win-Rate (%)': d_winrate,
+            'Doppel Legs (+)': d_lw,
+            'Doppel Legs (-)': d_ll,
+            'Doppel-Average (Ø)': d_avg,
+        }
+        
+    all_player_names = sorted(p_df['name'].tolist())
+    
+    st.divider()
+    st.markdown("#### 1. Spieler für den Vergleich auswählen")
+    
+    # Vorauswahl: Spieler mit den meisten Spielen
+    default_selected = [p for p in all_player_names if player_stats_dict[p]['Einzel-Spiele'] > 0][:3]
+    if not default_selected:
+        default_selected = all_player_names[:2]
+        
+    selected_players = st.multiselect(
+        "Wähle beliebig viele Spieler aus der Liste:",
+        options=all_player_names,
+        default=default_selected,
+        key="compare_selected_players"
+    )
+    
+    if not selected_players:
+        st.warning("⚠️ Bitte wähle mindestens einen Spieler zum Analysieren aus.")
+    else:
+        st.divider()
+        st.markdown("#### 2. Statistiken & Kennzahlen filtern")
+        
+        METRIC_CATEGORIES = {
+            "🏆 Wertung & Bilanzen": [
+                'Gesamt-Rating', 'Einzel-Rating (Ø)', 'Doppel-Bonus (Pkt)',
+                'Einzel-Spiele', 'Einzel-Siege', 'Einzel Win-Rate (%)',
+                'Einzel Legs (+)', 'Einzel Legs (-)', 'Einzel Leg-Diff'
+            ],
+            "🎯 Average-Werte": [
+                'Gesamt-Average (Ø)', '9-Dart Average (Ø)', '18-Dart Average (Ø)', 'Bester Match-Average'
+            ],
+            "💥 Scoring & Highscores": [
+                '80+ Scores', '100+ Scores', '140+ Scores', '180er Highscores', 'Scores pro Leg (80+)'
+            ],
+            "🏁 Highlights & Finishes": [
+                'Höchstes Finish', 'Short Legs (≤18 Darts)', 'Specials Gesamt', 'Doppel-Specials'
+            ],
+            "👥 Doppel-Performance": [
+                'Doppel-Spiele', 'Doppel-Siege', 'Doppel Win-Rate (%)',
+                'Doppel Legs (+)', 'Doppel Legs (-)', 'Doppel-Average (Ø)'
+            ]
+        }
+        
+        col_f1, col_f2 = st.columns([1.2, 2.8])
+        with col_f1:
+            cat_choice = st.multiselect(
+                "Kategorien auswählen:",
+                list(METRIC_CATEGORIES.keys()),
+                default=list(METRIC_CATEGORIES.keys()),
+                key="cat_filter_choice"
+            )
+            
+        active_metrics = []
+        for cat in cat_choice:
+            active_metrics.extend(METRIC_CATEGORIES[cat])
+            
+        with col_f2:
+            all_available_metrics = [m for cat_metrics in METRIC_CATEGORIES.values() for m in cat_metrics]
+            custom_metrics = st.multiselect(
+                "Einzelne Kennzahlen an-/abwählen:",
+                options=all_available_metrics,
+                default=active_metrics,
+                key="custom_metrics_choice"
+            )
+            
+        if not custom_metrics:
+            st.info("Bitte wähle mindestens eine Kennzahl aus.")
+        else:
+            st.divider()
+            st.markdown("#### 3. Direkte Gegenüberstellung (Head-to-Head Matrix)")
+            
+            comp_data = {}
+            for p in selected_players:
+                p_team = player_stats_dict[p]['Team']
+                col_name = f"{p} ({p_team})"
+                comp_data[col_name] = {m: player_stats_dict[p][m] for m in custom_metrics}
+                
+            comp_df = pd.DataFrame(comp_data)
+            
+            def format_val(val, metric_name):
+                if isinstance(val, (int, float)):
+                    if "%" in metric_name:
+                        return f"{val:.1f}%"
+                    elif "Average" in metric_name or "Avg" in metric_name or "Rating" in metric_name or "pro Leg" in metric_name or "Bonus" in metric_name:
+                        return f"{val:.2f}" if ("Rating" in metric_name or "pro Leg" in metric_name) else f"{val:.1f}"
+                    else:
+                        return f"{int(val)}"
+                return str(val)
+                
+            formatted_table = comp_df.astype(object).copy()
+            for m in custom_metrics:
+                row_vals = comp_df.loc[m]
+                is_lower_better = "(-)" in m
+                try:
+                    num_vals = pd.to_numeric(row_vals)
+                    best_val = num_vals.min() if is_lower_better else num_vals.max()
+                except Exception:
+                    best_val = None
+                    
+                for col in comp_df.columns:
+                    raw_v = comp_df.loc[m, col]
+                    fmt_v = format_val(raw_v, m)
+                    if best_val is not None and raw_v == best_val and raw_v > 0 and len(selected_players) > 1:
+                        formatted_table.loc[m, col] = f"👑 {fmt_v}"
+                    else:
+                        formatted_table.loc[m, col] = fmt_v
+                        
+            st.dataframe(formatted_table, use_container_width=True)
+            
+            st.divider()
+            st.markdown("#### 4. Visueller Vergleich im Diagramm")
+            chart_candidates = [m for m in custom_metrics if any(k in m for k in ['Average', 'Rating', '180er', 'Win-Rate', 'Finish', 'Scores', 'Legs'])]
+            if chart_candidates:
+                col_c_sel, _ = st.columns([2, 2])
+                with col_c_sel:
+                    selected_chart_metric = st.selectbox("Wähle eine Kennzahl für das Balkendiagramm:", chart_candidates, key="chart_metric_sel")
+                
+                chart_df = pd.DataFrame({
+                    'Spieler': [get_short_name(p) for p in selected_players],
+                    selected_chart_metric: [float(player_stats_dict[p][selected_chart_metric]) for p in selected_players]
+                }).set_index('Spieler')
+                
+                st.bar_chart(chart_df, color="#00D4FF")
+
 
 render_impressum_footer()

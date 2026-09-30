@@ -74,7 +74,7 @@ def _get_optimized_avatar_b64(photo_path, max_dim=120):
     except Exception:
         return ("png" if photo_path.endswith(".png") else "jpeg"), get_base64_image(photo_path)
 
-def get_avatar_svg(name, border_color="#00D4FF", size=70):
+def get_avatar_svg(name, border_color="#3B82F6", size=70):
     photo_path = get_player_photo_path(name)
     if photo_path and os.path.exists(photo_path):
         target_dim = max(size * 2, 60)
@@ -84,72 +84,68 @@ def get_avatar_svg(name, border_color="#00D4FF", size=70):
     parts = name.strip().split()
     initials = "".join([p[0].upper() for p in parts[:2]]) if parts else "🎯"
     font_s = max(int(size * 0.36), 11)
-    return f'<div style="width:{size}px;height:{size}px;border-radius:50%;background:linear-gradient(135deg,#0A1936,#1E3A8A);border:2px solid {border_color};box-shadow:0 0 10px {border_color}88;display:flex;align-items:center;justify-content:center;color:#FFFFFF;font-weight:800;font-size:{font_s}px;letter-spacing:1px;margin:0 auto;">{initials}</div>'
+    return f'<div style="width:{size}px;height:{size}px;border-radius:50%;background:linear-gradient(135deg,#0B1226,#1E293B);border:2px solid {border_color};box-shadow:0 0 10px {border_color}66;display:flex;align-items:center;justify-content:center;color:#FFFFFF;font-weight:800;font-size:{font_s}px;letter-spacing:1px;margin:0 auto;">{initials}</div>'
 
 def apply_custom_theme():
-    bg_b64 = get_base64_image("assets/bg.jpg")
-    bg_css = f"""
-        background-image: linear-gradient(rgba(5, 11, 26, 0.78), rgba(3, 7, 18, 0.88)), url('data:image/jpeg;base64,{bg_b64}');
-        background-size: cover;
-        background-position: center;
-        background-attachment: fixed;
-    """ if bg_b64 else "background: #050B1A;"
-
-    st.markdown(f"""
+    st.markdown("""
     <style>
-    /* Erste Seite in der Navigationsleiste immer zwingend als 'Startseite' beschriften */
-    [data-testid="stSidebarNav"] li:first-child a span {{
+    /* 1. SIDEBAR & DEFAULT HEADER PERMANENT AUSBLENDEN */
+    [data-testid="stSidebar"], 
+    [data-testid="stSidebarNav"], 
+    [data-testid="collapsedControl"], 
+    [data-testid="stSidebarCollapseButton"],
+    header [data-testid="stHeaderActionElements"],
+    button[kind="header"] {
         display: none !important;
-    }}
-    [data-testid="stSidebarNav"] li:first-child a::after {{
-        content: "Startseite" !important;
-        font-size: 20px !important;
-        font-weight: 800 !important;
-        color: #FFFFFF !important;
-        margin-left: 8px !important;
-    }}
+        visibility: hidden !important;
+        width: 0 !important;
+        height: 0 !important;
+    }
+    section[data-testid="stSidebar"] {
+        display: none !important;
+        width: 0 !important;
+    }
+    header, [data-testid="stHeader"] {
+        display: none !important;
+        visibility: hidden !important;
+        height: 0 !important;
+        width: 0 !important;
+        pointer-events: none !important;
+    }
 
-    /* Global Doppelte Schriftgröße */
-    html, body, [data-testid="stAppViewContainer"] {{
-        {bg_css}
+    /* 2. EDLES MATT-SCHWARZES THEME (Obsidian + Silber + Blau) */
+    html, body, [data-testid="stAppViewContainer"] {
+        background: #050811 !important;
         color: #FFFFFF !important;
-        font-size: 19px !important;
-    }}
+        font-size: 17px !important;
+    }
     
-    p, span, div, label, input, button, select {{
-        font-size: 19px !important;
-    }}
+    p, span, div, label, input, button, select {
+        font-size: 16px !important;
+    }
     
-    [data-testid="stHeader"] {{
-        background: transparent !important;
-    }}
-    
-    [data-testid="stSidebar"] {{
-        background: rgba(5, 12, 30, 0.95) !important;
-        backdrop-filter: blur(20px) !important;
-        border-right: 2px solid rgba(0, 212, 255, 0.35);
-        font-size: 20px !important;
-    }}
-    
-    .block-container {{
-        padding-top: 1.5rem !important;
+    .block-container {
+        padding-top: 0.8rem !important;
         padding-bottom: 2rem !important;
-        max-width: 100% !important;
-    }}
+        padding-left: 2rem !important;
+        padding-right: 2rem !important;
+        max-width: 98% !important;
+    }
     
-    .mockup-card {{
-        background: rgba(13, 22, 41, 0.72);
+    /* 3. KARTEN & CONTAINER */
+    .mockup-card {
+        background: rgba(11, 16, 29, 0.88);
         border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 14px;
         padding: 20px 22px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45);
         backdrop-filter: blur(14px);
         -webkit-backdrop-filter: blur(14px);
         margin-bottom: 16px;
-    }}
+    }
     
-    .card-title {{
-        color: #F8FAFC;
+    .card-title {
+        color: #FFFFFF;
         font-size: 14px !important;
         font-weight: 700;
         letter-spacing: 0.75px;
@@ -160,85 +156,88 @@ def apply_custom_theme():
         margin-bottom: 14px;
         border-bottom: 1px solid rgba(255, 255, 255, 0.08);
         padding-bottom: 8px;
-    }}
+    }
     
-    .card-title span.icon {{
+    .card-title span.icon {
         color: #94A3B8;
         font-size: 14px !important;
-    }}
+    }
     
-    .team-pill-a {{
-        background: rgba(0, 212, 255, 0.12);
-        color: #00D4FF;
-        border: 1px solid rgba(0, 212, 255, 0.3);
+    /* TEAM PILLS: BLAU (A-Team) vs SILBER (B-Team) */
+    .team-pill-a {
+        background: rgba(37, 99, 235, 0.15);
+        color: #60A5FA;
+        border: 1px solid rgba(59, 130, 246, 0.35);
         font-weight: 700;
         font-size: 13px !important;
         letter-spacing: 0.5px;
         padding: 6px 14px;
         border-radius: 8px;
         text-align: center;
-    }}
+    }
     
-    .team-pill-b {{
-        background: rgba(245, 158, 11, 0.12);
-        color: #F59E0B;
-        border: 1px solid rgba(245, 158, 11, 0.3);
+    .team-pill-b {
+        background: rgba(226, 232, 240, 0.08);
+        color: #E2E8F0;
+        border: 1px solid rgba(226, 232, 240, 0.25);
         font-weight: 700;
         font-size: 13px !important;
         letter-spacing: 0.5px;
         padding: 6px 14px;
         border-radius: 8px;
         text-align: center;
-    }}
+    }
     
-    .battle-row {{
+    /* BATTLE BARS */
+    .battle-row {
         display: flex;
         align-items: center;
         justify-content: space-between;
         margin: 6px 0 2px 0;
         font-size: 13px !important;
-    }}
-    .battle-val-a {{
-        color: #00D4FF;
+    }
+    .battle-val-a {
+        color: #60A5FA;
         font-weight: 700;
         font-size: 14px !important;
         width: 45px;
         text-align: left;
-    }}
-    .battle-label {{
+    }
+    .battle-label {
         color: #94A3B8;
         font-weight: 500;
         font-size: 12.5px !important;
         flex: 1;
         text-align: center;
-    }}
-    .battle-val-b {{
-        color: #F59E0B;
+    }
+    .battle-val-b {
+        color: #E2E8F0;
         font-weight: 700;
         font-size: 14px !important;
         width: 45px;
         text-align: right;
-    }}
-    .battle-bar-wrap {{
+    }
+    .battle-bar-wrap {
         display: flex;
         height: 4px;
         border-radius: 2px;
         background: rgba(255, 255, 255, 0.08);
         overflow: hidden;
         margin-bottom: 8px;
-    }}
-    .battle-bar-a {{
-        background: #00D4FF;
+    }
+    .battle-bar-a {
+        background: #3B82F6;
         height: 100%;
-    }}
-    .battle-bar-b {{
-        background: #F59E0B;
+    }
+    .battle-bar-b {
+        background: #CBD5E1;
         height: 100%;
         margin-left: auto;
-    }}
+    }
     
-    .kpi-box {{
-        background: rgba(13, 22, 41, 0.65);
+    /* KPI BOXES */
+    .kpi-box {
+        background: rgba(11, 16, 29, 0.75);
         border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 12px;
         padding: 14px 10px;
@@ -246,123 +245,182 @@ def apply_custom_theme():
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
         height: 100%;
         transition: border-color 0.2s;
-    }}
-    .kpi-box:hover {{
-        border-color: rgba(0, 212, 255, 0.25);
-    }}
-    .kpi-tag {{
+    }
+    .kpi-box:hover {
+        border-color: rgba(59, 130, 246, 0.4);
+    }
+    .kpi-tag {
         font-size: 11px !important;
         color: #64748B;
         font-weight: 700;
         letter-spacing: 0.6px;
         text-transform: uppercase;
-    }}
-    .kpi-main {{
+    }
+    .kpi-main {
         font-size: 23px !important;
         font-weight: 800;
-        color: #F8FAFC;
+        color: #FFFFFF;
         margin: 4px 0 2px 0;
         letter-spacing: -0.3px;
-    }}
-    .kpi-sub {{
+    }
+    .kpi-sub {
         font-size: 12px !important;
         color: #94A3B8;
         font-weight: 500;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-    }}
+    }
     
-    .rank-row {{
+    /* RANGLISTEN-ZEILEN */
+    .rank-row {
         display: flex;
         align-items: center;
         padding: 10px 12px;
         border-radius: 12px;
         margin-bottom: 8px;
-        background: rgba(255, 255, 255, 0.04);
-        border: 1px solid rgba(0, 212, 255, 0.12);
-    }}
-    .rank-row:hover {{
-        background: rgba(0, 212, 255, 0.15);
-        border-color: rgba(0, 212, 255, 0.4);
-    }}
-    .rank-num {{
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .rank-row:hover {
+        background: rgba(37, 99, 235, 0.12);
+        border-color: rgba(59, 130, 246, 0.35);
+    }
+    .rank-num {
         width: 30px;
-        color: #00D4FF;
+        color: #3B82F6;
         font-weight: 800;
-        font-size: 18px !important;
-    }}
-    .rank-name {{
+        font-size: 17px !important;
+    }
+    .rank-name {
         flex: 1;
         font-weight: 700;
-        font-size: 18px !important;
+        font-size: 16px !important;
         color: #FFFFFF;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
         padding-left: 8px;
-    }}
-    .rank-stat {{
+    }
+    .rank-stat {
         width: 55px;
         text-align: right;
-        font-size: 17px !important;
+        font-size: 15px !important;
         color: #CBD5E1;
         font-weight: 600;
-    }}
-    .rank-pts {{
+    }
+    .rank-pts {
         width: 70px;
         text-align: right;
-        font-size: 19px !important;
-        color: #00D4FF;
+        font-size: 17px !important;
+        color: #60A5FA;
         font-weight: 900;
-    }}
+    }
 
-    .stSelectbox label, .stTextInput label, .stNumberInput label, .stDateInput label {{
-        font-size: 19px !important;
+    /* TOP BROWSER-STYLE NAVIGATION: KEINE KACHELN, KEINE BOXEN! */
+    [data-testid="stPageLink"] {
+        padding: 0 !important;
+        margin: 0 !important;
+        background: transparent !important;
+        border: none !important;
+    }
+    
+    [data-testid="stPageLink"] a {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        padding: 6px 4px 8px 4px !important;
+        color: #94A3B8 !important;
+        font-size: 13.5px !important;
+        font-weight: 500 !important;
+        letter-spacing: 0.2px !important;
+        text-decoration: none !important;
+        transition: color 0.15s ease !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        white-space: nowrap !important;
+        height: auto !important;
+        min-height: unset !important;
+        width: auto !important;
+        border-bottom: 2px solid transparent !important;
+    }
+    
+    [data-testid="stPageLink"] a:hover {
+        background: transparent !important;
+        color: #FFFFFF !important;
+        border-bottom: 2px solid rgba(59, 130, 246, 0.45) !important;
+    }
+    
+    [data-testid="stPageLink"] a[aria-current="page"],
+    [data-testid="stPageLink"] a.active {
+        background: transparent !important;
+        color: #FFFFFF !important;
         font-weight: 700 !important;
-        color: #00D4FF !important;
-    }}
-    input, select, .stSelectbox div {{
-        font-size: 18px !important;
-    }}
-    button {{
-        font-size: 19px !important;
-        font-weight: 800 !important;
-    }}
+        border-bottom: 2px solid #3B82F6 !important;
+        text-shadow: 0 0 12px rgba(59, 130, 246, 0.6) !important;
+    }
+
+    button[key="top_nav_logout_btn"] {
+        height: 28px !important;
+        min-height: 28px !important;
+        font-size: 11.5px !important;
+        background: transparent !important;
+        border: 1px solid rgba(255, 255, 255, 0.12) !important;
+        color: #94A3B8 !important;
+        border-radius: 6px !important;
+        padding: 0 8px !important;
+        transition: all 0.15s ease !important;
+    }
+    button[key="top_nav_logout_btn"]:hover {
+        background: rgba(239, 68, 68, 0.12) !important;
+        border-color: rgba(239, 68, 68, 0.4) !important;
+        color: #FCA5A5 !important;
+    }
+
+    .stSelectbox label, .stTextInput label, .stNumberInput label, .stDateInput label {
+        font-size: 16px !important;
+        font-weight: 700 !important;
+        color: #E2E8F0 !important;
+    }
+    input, select, .stSelectbox div {
+        font-size: 16px !important;
+    }
+    button {
+        font-size: 16px !important;
+        font-weight: 700 !important;
+    }
     </style>
     """, unsafe_allow_html=True)
-    
-    # Wenn nicht angemeldet: Seitenleiste und Navigation sofort per CSS unsichtbar machen
-    if not st.session_state.get('authenticated', False):
-        st.markdown("""
-        <style>
-        [data-testid="stSidebar"], 
-        [data-testid="stSidebarNav"], 
-        [data-testid="collapsedControl"], 
-        [data-testid="stSidebarCollapseButton"],
-        button[kind="header"] {
-            display: none !important;
-            visibility: hidden !important;
-            width: 0 !important;
-        }
-        section[data-testid="stSidebar"] {
-            display: none !important;
-            width: 0 !important;
-        }
-        </style>
-        """, unsafe_allow_html=True)
+
+def is_local_env():
+    try:
+        from database import is_postgres
+        return not is_postgres()
+    except Exception:
+        return True
 
 def init_session_auth():
-    if 'authenticated' not in st.session_state:
-        st.session_state['authenticated'] = False
-    if 'role' not in st.session_state:
-        st.session_state['role'] = None
-    if 'user_name' not in st.session_state:
-        st.session_state['user_name'] = None
-    if 'player_id' not in st.session_state:
-        st.session_state['player_id'] = None
-    if 'must_change_pw' not in st.session_state:
-        st.session_state['must_change_pw'] = False
+    if is_local_env():
+        if 'authenticated' not in st.session_state or not st.session_state['authenticated']:
+            st.session_state['authenticated'] = True
+            st.session_state['user_name'] = 'Sebastian Kirste'
+            st.session_state['player_id'] = 3
+            st.session_state['must_change_pw'] = False
+        if 'role' not in st.session_state or st.session_state['role'] is None:
+            st.session_state['role'] = 'admin'
+    else:
+        if 'authenticated' not in st.session_state:
+            st.session_state['authenticated'] = False
+        if 'role' not in st.session_state:
+            st.session_state['role'] = None
+        if 'user_name' not in st.session_state:
+            st.session_state['user_name'] = None
+        if 'player_id' not in st.session_state:
+            st.session_state['player_id'] = None
+        if 'must_change_pw' not in st.session_state:
+            st.session_state['must_change_pw'] = False
 
 def check_login(username, password):
     u = username.strip().lower()
@@ -390,67 +448,186 @@ def check_login(username, password):
         
     return None
 
-def render_sidebar_auth():
+def render_top_navbar():
     init_session_auth()
     if not st.session_state.get('authenticated', False):
-        st.markdown("""
-        <style>
-        [data-testid="stSidebar"], 
-        [data-testid="stSidebarNav"], 
-        [data-testid="collapsedControl"], 
-        [data-testid="stSidebarCollapseButton"],
-        button[kind="header"] {
-            display: none !important;
-            visibility: hidden !important;
-            width: 0 !important;
-        }
-        section[data-testid="stSidebar"] {
-            display: none !important;
-            width: 0 !important;
-        }
-        </style>
-        """, unsafe_allow_html=True)
         return
 
-    with st.sidebar:
-        st.image("assets/logo.png", width=180)
-        st.markdown("<h3 style='text-align: center; color: #00D4FF; margin-top: -5px; font-weight: 900;'>LIONS LEAGUE</h3>", unsafe_allow_html=True)
-        st.caption("<div style='text-align: center; color: #CBD5E1; font-size: 15px;'>SC Weyhausen von 1921 e.V.</div>", unsafe_allow_html=True)
-        st.divider()
-        
-        role_badge = "👑 **Admin**" if st.session_state.get('role') == 'admin' else "🎯 **Spieler**"
-        st.markdown(f"Status:\n\n{role_badge} `{st.session_state.get('user_name')}`")
-        if st.button("🚪 Abmelden", key="sidebar_logout_btn", use_container_width=True):
-            st.session_state['authenticated'] = False
-            st.session_state['role'] = None
-            st.session_state['user_name'] = None
-            st.session_state['player_id'] = None
-            st.session_state['must_change_pw'] = False
-            st.rerun()
-        st.divider()
+    # Always ensure sidebar is 100% hidden
+    st.markdown("""
+    <style>
+    [data-testid="stSidebar"], 
+    [data-testid="stSidebarNav"], 
+    [data-testid="collapsedControl"], 
+    [data-testid="stSidebarCollapseButton"],
+    header [data-testid="stHeaderActionElements"],
+    button[kind="header"] {
+        display: none !important;
+        visibility: hidden !important;
+        width: 0 !important;
+        height: 0 !important;
+    }
+    section[data-testid="stSidebar"] {
+        display: none !important;
+        width: 0 !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
-    if st.session_state.get('role') != 'admin':
-        st.markdown("""
-        <style>
-        [data-testid="stSidebarNav"] a[href*="Eingabe"], 
-        [data-testid="stSidebarNav"] a[href*="Verwaltung"], 
-        [data-testid="stSidebarNav"] a[href*="Einstellungen"],
-        [data-testid="stSidebarNav"] a[href*="Export"] {
-            display: none !important;
-        }
-        [data-testid="stToolbar"] {
-            visibility: hidden !important;
-        }
-        [data-testid="stHeader"] {
-            display: none !important;
-        }
-        </style>
-        """, unsafe_allow_html=True)
+    role = st.session_state.get('role', 'player')
+    user_name = st.session_state.get('user_name', 'Spieler')
+    is_admin = (role == 'admin')
+
+    logo_b64 = get_base64_image("assets/logo.png")
+    logo_img = f'<img src="data:image/png;base64,{logo_b64}" style="width:24px;height:24px;border-radius:4px;vertical-align:middle;margin-right:8px;" />' if logo_b64 else '🦁 '
+
+    # 1. Hauptmenü (Liga & Spielbetrieb)
+    main_items = [
+        ("app.py", "Dashboard"),
+        ("pages/2_Teams.py", "Teams"),
+        ("pages/3_Spieler.py", "Spieler"),
+        ("pages/4_Liga.py", "Liga"),
+        ("pages/10_Dart_Analytics_Engine.py", "Dart Analytics Engine"),
+        ("pages/5_Hilfe.py", "Hilfe"),
+    ]
+
+    # 2. Adminbereich (nur Spartenleitung)
+    admin_items = [
+        ("pages/6_Eingabe.py", "Eingabe"),
+        ("pages/7_Verwaltung.py", "Verwaltung"),
+        ("pages/8_Einstellungen.py", "Optionen"),
+    ]
+
+    is_local = is_local_env()
+
+    def _on_local_role_switch():
+        choice = st.session_state.get('local_role_mode')
+        if choice == "🎯 Spieler":
+            st.session_state['role'] = 'player'
+        else:
+            st.session_state['role'] = 'admin'
+
+    if is_admin:
+        # Gewichte: Brand (1.5), 6 Main-Tabs, Trenner (0.12), 3 Admin-Tabs, User/Switcher
+        if is_local:
+            weights = [1.5, 0.7, 0.55, 0.55, 0.45, 1.4, 0.5, 0.12, 0.6, 0.75, 0.65, 2.0]
+            cols = st.columns(weights, vertical_alignment="center", gap="small")
+        else:
+            weights = [1.5, 0.7, 0.55, 0.55, 0.45, 1.4, 0.5, 0.12, 0.6, 0.75, 0.65, 1.2, 0.7]
+            cols = st.columns(weights, vertical_alignment="center", gap="small")
+
+        with cols[0]:
+            st.markdown(f"""
+            <div style="display:flex;align-items:center;white-space:nowrap;line-height:1;">
+                {logo_img}
+                <span style="font-weight:800;font-size:14.5px;color:#FFFFFF;letter-spacing:0.5px;">LIONS LEAGUE</span>
+            </div>
+            """, unsafe_allow_html=True)
+
+        for i, (path, label) in enumerate(main_items):
+            with cols[i + 1]:
+                st.page_link(path, label=label)
+
+        with cols[7]:
+            st.markdown('<span style="color:rgba(255,255,255,0.18);font-size:14px;display:block;text-align:center;">|</span>', unsafe_allow_html=True)
+
+        for j, (path, label) in enumerate(admin_items):
+            with cols[8 + j]:
+                st.page_link(path, label=label)
+
+        if is_local:
+            current_mode = "👑 Admin" if is_admin else "🎯 Spieler"
+            if 'local_role_mode' not in st.session_state or st.session_state['local_role_mode'] != current_mode:
+                st.session_state['local_role_mode'] = current_mode
+
+            with cols[-1]:
+                st.segmented_control(
+                    "Ansicht",
+                    ["👑 Admin", "🎯 Spieler"],
+                    key="local_role_mode",
+                    on_change=_on_local_role_switch,
+                    label_visibility="collapsed"
+                )
+        else:
+            with cols[-2]:
+                st.markdown(f"""
+                <div style="text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px;color:#94A3B8;">
+                    <span style="color:#FFFFFF;font-weight:600;">{user_name}</span> <span style="color:#3B82F6;font-size:10.5px;font-weight:700;">(Admin)</span>
+                </div>
+                """, unsafe_allow_html=True)
+
+            with cols[-1]:
+                if st.button("Abmelden", key="top_nav_logout_btn", use_container_width=True):
+                    st.session_state['authenticated'] = False
+                    st.session_state['role'] = None
+                    st.session_state['user_name'] = None
+                    st.session_state['player_id'] = None
+                    st.session_state['must_change_pw'] = False
+                    st.switch_page("app.py")
+    else:
+        # Spieler-Ansicht
+        if is_local:
+            weights = [2.0, 0.85, 0.75, 0.75, 0.65, 1.5, 0.65, 2.0]
+            cols = st.columns(weights, vertical_alignment="center", gap="small")
+        else:
+            weights = [2.0, 0.85, 0.75, 0.75, 0.65, 1.5, 0.65, 1.3, 0.75]
+            cols = st.columns(weights, vertical_alignment="center", gap="small")
+
+        with cols[0]:
+            st.markdown(f"""
+            <div style="display:flex;align-items:center;white-space:nowrap;line-height:1;">
+                {logo_img}
+                <span style="font-weight:800;font-size:14.5px;color:#FFFFFF;letter-spacing:0.5px;">LIONS LEAGUE</span>
+            </div>
+            """, unsafe_allow_html=True)
+
+        for i, (path, label) in enumerate(main_items):
+            with cols[i + 1]:
+                st.page_link(path, label=label)
+
+        if is_local:
+            current_mode = "👑 Admin" if is_admin else "🎯 Spieler"
+            if 'local_role_mode' not in st.session_state or st.session_state['local_role_mode'] != current_mode:
+                st.session_state['local_role_mode'] = current_mode
+
+            with cols[-1]:
+                st.segmented_control(
+                    "Ansicht",
+                    ["👑 Admin", "🎯 Spieler"],
+                    key="local_role_mode",
+                    on_change=_on_local_role_switch,
+                    label_visibility="collapsed"
+                )
+        else:
+            with cols[-2]:
+                st.markdown(f"""
+                <div style="text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px;color:#94A3B8;">
+                    <span style="color:#FFFFFF;font-weight:600;">{user_name}</span>
+                </div>
+                """, unsafe_allow_html=True)
+
+            with cols[-1]:
+                if st.button("Abmelden", key="top_nav_logout_btn", use_container_width=True):
+                    st.session_state['authenticated'] = False
+                    st.session_state['role'] = None
+                    st.session_state['user_name'] = None
+                    st.session_state['player_id'] = None
+                    st.session_state['must_change_pw'] = False
+                    st.switch_page("app.py")
+
+
+    # Feine durchgehende Trennlinie wie in einem Webbrowser
+    st.markdown("""
+    <div style="border-bottom: 1px solid rgba(255, 255, 255, 0.08); margin-top: 4px; margin-bottom: 18px;"></div>
+    """, unsafe_allow_html=True)
+
+def render_sidebar_auth():
+    render_top_navbar()
 
 def render_impressum_footer():
     st.markdown("""
-    <div style='text-align: center; margin-top: 50px; color: #94A3B8; font-size: 14px; border-top: 1px solid rgba(0,212,255,0.2); padding-top: 20px;'>
-        🦁 <b>Lions Weyhausen</b> • Dartsport im Sportclub Weyhausen von 1921 e.V. • <span style="color: #00D4FF; font-weight: 700;">Version V1.10</span><br>
+    <div style='text-align: center; margin-top: 50px; color: #94A3B8; font-size: 13.5px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 20px;'>
+        🦁 <b>Lions Weyhausen</b> • Dartsport im Sportclub Weyhausen von 1921 e.V. • <span style="color: #60A5FA; font-weight: 700;">Version V1.2</span><br>
         Spartenleiter: Sebastian Kirste (<code>sebastian.kirste@sc-weyhausen.de</code>)<br>
         <span style="font-size: 12px; color: #64748B;">© 2026 SC Weyhausen e.V. • Impressum & Datenschutz</span>
     </div>
@@ -513,8 +690,14 @@ def require_admin():
                 st.switch_page("app.py")
         st.stop()
     if st.session_state.get('role') != 'admin':
-        st.error("⛔ Zugriff verweigert. Diese Seite ist nur für den Spartenleiter (Admin) zugänglich.")
-        st.stop()
+        if is_local_env():
+            st.switch_page("app.py")
+        else:
+            render_sidebar_auth()
+            st.error("⛔ Zugriff verweigert. Diese Seite ist nur für den Spartenleiter (Admin) zugänglich.")
+            if st.button("⬅️ Zur Startseite wechseln", type="primary", key="btn_require_admin_back"):
+                st.switch_page("app.py")
+            st.stop()
     render_sidebar_auth()
 
 def get_points_for_average(value):
