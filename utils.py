@@ -92,18 +92,29 @@ def apply_custom_theme():
     /* 1. SIDEBAR & DEFAULT HEADER PERMANENT AUSBLENDEN */
     [data-testid="stSidebar"], 
     [data-testid="stSidebarNav"], 
+    [data-testid="stSidebarNavItems"],
     [data-testid="collapsedControl"], 
     [data-testid="stSidebarCollapseButton"],
+    [data-testid="stSidebarCollapsedControl"],
     header [data-testid="stHeaderActionElements"],
     button[kind="header"] {
         display: none !important;
         visibility: hidden !important;
         width: 0 !important;
+        min-width: 0 !important;
+        max-width: 0 !important;
         height: 0 !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+        transform: translateX(-9999px) !important;
     }
     section[data-testid="stSidebar"] {
         display: none !important;
+        visibility: hidden !important;
         width: 0 !important;
+        min-width: 0 !important;
+        max-width: 0 !important;
+        transform: translateX(-9999px) !important;
     }
     header, [data-testid="stHeader"] {
         display: none !important;
@@ -448,6 +459,18 @@ def check_login(username, password):
         
     return None
 
+def get_dashboard_page():
+    try:
+        from streamlit.runtime.scriptrunner import get_script_run_ctx
+        ctx = get_script_run_ctx()
+        if ctx and ctx.main_script_path:
+            basename = os.path.basename(ctx.main_script_path)
+            if "Startseite" in basename:
+                return "1_Startseite.py"
+    except Exception:
+        pass
+    return "app.py"
+
 def render_top_navbar():
     init_session_auth()
     if not st.session_state.get('authenticated', False):
@@ -458,18 +481,29 @@ def render_top_navbar():
     <style>
     [data-testid="stSidebar"], 
     [data-testid="stSidebarNav"], 
+    [data-testid="stSidebarNavItems"],
     [data-testid="collapsedControl"], 
     [data-testid="stSidebarCollapseButton"],
+    [data-testid="stSidebarCollapsedControl"],
     header [data-testid="stHeaderActionElements"],
     button[kind="header"] {
         display: none !important;
         visibility: hidden !important;
         width: 0 !important;
+        min-width: 0 !important;
+        max-width: 0 !important;
         height: 0 !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+        transform: translateX(-9999px) !important;
     }
     section[data-testid="stSidebar"] {
         display: none !important;
+        visibility: hidden !important;
         width: 0 !important;
+        min-width: 0 !important;
+        max-width: 0 !important;
+        transform: translateX(-9999px) !important;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -481,9 +515,11 @@ def render_top_navbar():
     logo_b64 = get_base64_image("assets/logo.png")
     logo_img = f'<img src="data:image/png;base64,{logo_b64}" style="width:24px;height:24px;border-radius:4px;vertical-align:middle;margin-right:8px;" />' if logo_b64 else '🦁 '
 
+    dash_page = get_dashboard_page()
+
     # 1. Hauptmenü (Liga & Spielbetrieb)
     main_items = [
-        ("app.py", "Dashboard"),
+        (dash_page, "Dashboard"),
         ("pages/2_Teams.py", "Teams"),
         ("pages/3_Spieler.py", "Spieler"),
         ("pages/4_Liga.py", "Liga"),
@@ -563,7 +599,7 @@ def render_top_navbar():
                     st.session_state['user_name'] = None
                     st.session_state['player_id'] = None
                     st.session_state['must_change_pw'] = False
-                    st.switch_page("app.py")
+                    st.switch_page(dash_page)
     else:
         # Spieler-Ansicht
         if is_local:
@@ -613,7 +649,7 @@ def render_top_navbar():
                     st.session_state['user_name'] = None
                     st.session_state['player_id'] = None
                     st.session_state['must_change_pw'] = False
-                    st.switch_page("app.py")
+                    st.switch_page(dash_page)
 
 
     # Feine durchgehende Trennlinie wie in einem Webbrowser
@@ -635,21 +671,35 @@ def render_impressum_footer():
 
 def require_login():
     init_session_auth()
+    dash_page = get_dashboard_page()
     if not st.session_state.get('authenticated', False):
         st.markdown("""
         <style>
         [data-testid="stSidebar"], 
         [data-testid="stSidebarNav"], 
+        [data-testid="stSidebarNavItems"],
         [data-testid="collapsedControl"], 
         [data-testid="stSidebarCollapseButton"],
+        [data-testid="stSidebarCollapsedControl"],
+        header [data-testid="stHeaderActionElements"],
         button[kind="header"] {
             display: none !important;
             visibility: hidden !important;
             width: 0 !important;
+            min-width: 0 !important;
+            max-width: 0 !important;
+            height: 0 !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+            transform: translateX(-9999px) !important;
         }
         section[data-testid="stSidebar"] {
             display: none !important;
+            visibility: hidden !important;
             width: 0 !important;
+            min-width: 0 !important;
+            max-width: 0 !important;
+            transform: translateX(-9999px) !important;
         }
         </style>
         """, unsafe_allow_html=True)
@@ -658,27 +708,41 @@ def require_login():
         with col2:
             st.warning("🔒 **Zugriff geschützt:** Bitte melde dich zuerst auf der Startseite an.")
             if st.button("⬅️ Zur Anmeldung auf der Startseite", key="btn_require_login_redirect", type="primary", use_container_width=True):
-                st.switch_page("app.py")
+                st.switch_page(dash_page)
         st.stop()
     render_sidebar_auth()
 
 def require_admin():
     init_session_auth()
+    dash_page = get_dashboard_page()
     if not st.session_state.get('authenticated', False):
         st.markdown("""
         <style>
         [data-testid="stSidebar"], 
         [data-testid="stSidebarNav"], 
+        [data-testid="stSidebarNavItems"],
         [data-testid="collapsedControl"], 
         [data-testid="stSidebarCollapseButton"],
+        [data-testid="stSidebarCollapsedControl"],
+        header [data-testid="stHeaderActionElements"],
         button[kind="header"] {
             display: none !important;
             visibility: hidden !important;
             width: 0 !important;
+            min-width: 0 !important;
+            max-width: 0 !important;
+            height: 0 !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+            transform: translateX(-9999px) !important;
         }
         section[data-testid="stSidebar"] {
             display: none !important;
+            visibility: hidden !important;
             width: 0 !important;
+            min-width: 0 !important;
+            max-width: 0 !important;
+            transform: translateX(-9999px) !important;
         }
         </style>
         """, unsafe_allow_html=True)
@@ -687,16 +751,16 @@ def require_admin():
         with col2:
             st.warning("🔒 **Zugriff geschützt:** Bitte melde dich zuerst auf der Startseite an.")
             if st.button("⬅️ Zur Anmeldung auf der Startseite", key="btn_require_admin_redirect", type="primary", use_container_width=True):
-                st.switch_page("app.py")
+                st.switch_page(dash_page)
         st.stop()
     if st.session_state.get('role') != 'admin':
         if is_local_env():
-            st.switch_page("app.py")
+            st.switch_page(dash_page)
         else:
             render_sidebar_auth()
             st.error("⛔ Zugriff verweigert. Diese Seite ist nur für den Spartenleiter (Admin) zugänglich.")
             if st.button("⬅️ Zur Startseite wechseln", type="primary", key="btn_require_admin_back"):
-                st.switch_page("app.py")
+                st.switch_page(dash_page)
             st.stop()
     render_sidebar_auth()
 
